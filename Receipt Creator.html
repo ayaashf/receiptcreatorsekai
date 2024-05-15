@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+  <script>
+    function downloadPDF() {
+      google.script.run.saveAsPDF();
+    }
+
+    function redirectToSpreadsheet() {
+      window.location.href = "https://docs.google.com/spreadsheets/d/1EnkCriKkM7v5dDp8S9r-L8iLC9WTZOVD_GRBMML08to/edit";
+    }
+
+    function redirectToGoogleSheets() {
+      window.open("https://docs.google.com/spreadsheets/d/1EnkCriKkM7v5dDp8S9r-L8iLC9WTZOVD_GRBMML08to/edit#gid=1846972007");
+    }
+  </script>
+</head>
+<body>
+<section class="hero is-primary is-bold">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">Sekai Receipt Form</h1>
+    </div>
+  </div>
+</section>
+<form id="form" class="container m-4 pl-4" method="POST">
+  <div class="field">
+    <label class="label">Date</label>
+    <div class="control">
+      <input class="input" type="date" name="Date"/>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Auction ID</label>
+    <div class="control">
+      <input class="input" type="text" placeholder="Auction ID" name="AuctionID"/>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Customer Name</label>
+    <div class="control">
+      <input class="input" type="text" placeholder="Customer Name" name="CustomerName"/>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Address</label>
+    <div class="control">
+      <textarea class="textarea" placeholder="Address" name="Address"></textarea>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Mobile</label>
+    <div class="control">
+      <input class="input" type="tel" placeholder="Mobile" name="Mobile"/>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Payment Method</label>
+    <div class="control">
+      <input class="input" type="text" placeholder="Payment Method" name="PaymentMethod"/>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Item Description</label>
+    <div class="control">
+      <textarea class="textarea" placeholder="Item Description" name="ItemDescription"></textarea>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Price</label>
+    <div class="control">
+      <input class="input" type="number" placeholder="Price" name="Price"/>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-primary" type="submit" id="submit-button">Submit</button>
+    </div>
+    <div class="control">
+      <button class="button is-info" type="button" id="download-pdf-button" onclick="downloadPDF()">Download as PDF</button>
+    </div>
+    <div class="control">
+      <button class="button is-info" type="button" id="google-sheets-button" onclick="redirectToGoogleSheets()">Open Google Sheets</button>
+    </div>
+  </div>
+</form>
+<div id="message" style="display: none; margin: 20px; font-weight: bold; color: green; padding: 8px; background-color: beige; border-radius: 4px; border-color: aquamarine;"></div>
+
+<script>
+  document.getElementById("form").addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent the default form submission
+    document.getElementById("message").textContent = "Submitting..";
+    document.getElementById("message").style.display = "block";
+    document.getElementById("submit-button").disabled = true;
+
+    // Collect the form data
+    var formData = new FormData(this);
+    var keyValuePairs = [];
+    for (var pair of formData.entries()) {
+      keyValuePairs.push(pair[0] + "=" + pair[1]);
+    }
+
+    var formDataString = keyValuePairs.join("&");
+
+    // Send a POST request to your Google Apps Script
+    fetch(
+      "https://script.google.com/macros/s/AKfycbwm8H0I2DhbaO8k4bN1elIsbeLh1PR3Nv_KygVwAZBfoj-yoQJEQnXatWQxEceyv_QY/exec",
+      {
+        redirect: "follow",
+        method: "POST",
+        body: formDataString,
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+      }
+    )
+      .then(function (response) {
+        // Check if the request was successful
+        if (response) {
+          return response; // Assuming your script returns JSON response
+        } else {
+          throw new Error("Failed to submit the form.");
+        }
+      })
+      .then(function (data) {
+        // Display a success message
+        document.getElementById("message").textContent =
+          "Data submitted successfully!";
+        document.getElementById("message").style.display = "block";
+        document.getElementById("message").style.backgroundColor = "green";
+        document.getElementById("message").style.color = "beige";
+        document.getElementById("submit-button").disabled = false;
+
+        setTimeout(function () {
+          document.getElementById("message").textContent = "";
+          document.getElementById("message").style.display = "none";
+        }, 2600);
+      })
+      .catch(function (error) {
+        // Handle errors, you can display an error message here
+        console.error(error);
+        document.getElementById("message").textContent =
+          "An error occurred while submitting the form.";
+        document.getElementById("message").style.display = "block";
+      });
+  });
+</script>
+</body>
+</html>
