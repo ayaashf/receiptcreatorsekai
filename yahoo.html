@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ヤフオク 出品テンプレート生成ツール</title>
+<style>
+  :root{
+    --ink:#141414;
+    --panel:#1c1c1c;
+    --line:#2c2c2c;
+    --paper:#f4f2ee;
+    --accent:#ff6a00;
+    --accent-dim:#7a3a10;
+    --muted:#8a8a8a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--ink);
+    color:#eee;
+  }
+  header{
+    padding:22px 28px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+  }
+  header h1{
+    font-size:17px;
+    margin:0;
+    letter-spacing:.02em;
+    font-weight:700;
+  }
+  header .bar{
+    width:26px;height:3px;background:var(--accent);
+  }
+  header p{margin:0;color:var(--muted);font-size:12.5px;}
+  .layout{
+    display:grid;
+    grid-template-columns:380px 1fr;
+    min-height:calc(100vh - 68px);
+  }
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .form{
+    padding:22px;
+    border-right:1px solid var(--line);
+    background:var(--panel);
+    overflow-y:auto;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:11.5px;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:6px;
+    font-weight:700;
+  }
+  .field input[type=text], .field textarea, .field select{
+    width:100%;
+    background:#111;
+    border:1px solid var(--line);
+    color:#eee;
+    padding:9px 10px;
+    font-size:13.5px;
+    border-radius:3px;
+    font-family:inherit;
+    resize:vertical;
+  }
+  .field input[type=text]:focus, .field textarea:focus, .field select:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .grade-picker{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+  }
+  .grade-picker button{
+    padding:9px 0;
+    background:#111;
+    border:1px solid var(--line);
+    color:#ccc;
+    font-weight:700;
+    border-radius:3px;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .grade-picker button.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#111;
+  }
+  .field small{color:var(--muted);font-size:11px;display:block;margin-top:4px;}
+  .divider{
+    height:1px;background:var(--line);margin:20px 0;
+  }
+  .section-label{
+    font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px;font-weight:700;
+  }
+  .preview-pane{
+    display:flex;flex-direction:column;
+  }
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 22px;border-bottom:1px solid var(--line);
+    background:var(--panel);
+  }
+  .toolbar .tabs{display:flex;gap:2px;}
+  .toolbar .tabs button{
+    background:transparent;border:1px solid var(--line);color:#aaa;
+    padding:7px 16px;font-size:12.5px;cursor:pointer;border-radius:3px;
+  }
+  .toolbar .tabs button.active{background:#111;color:var(--accent);border-color:var(--accent);}
+  .copy-btn{
+    background:var(--accent);color:#111;border:none;padding:9px 18px;
+    font-size:12.5px;font-weight:700;border-radius:3px;cursor:pointer;letter-spacing:.02em;
+  }
+  .copy-btn:active{transform:scale(.97);}
+  .pane-body{flex:1;overflow:auto;background:var(--paper);}
+  #previewFrame{width:100%;height:100%;border:none;background:var(--paper);}
+  #htmlOutput{
+    width:100%;height:100%;border:none;background:#0d0d0d;color:#c7ffb3;
+    font-family:"SF Mono",Consolas,monospace;font-size:12px;line-height:1.6;
+    padding:20px;resize:none;box-sizing:border-box;
+  }
+  .hidden{display:none !important;}
+  .hint{
+    background:#241505;border:1px solid var(--accent-dim);color:#ffb87a;
+    padding:10px 12px;border-radius:4px;font-size:12px;line-height:1.6;margin-bottom:18px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar"></div>
+  <div>
+    <h1>ヤフオク出品テンプレート生成ツール</h1>
+    <p>左側を編集 → 右上でプレビュー確認 → 「HTML」タブでコードをコピーしてヤフオクに貼り付け</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <div class="form">
+    <div class="hint">グレードのボタンを押すと、下の説明表で該当行が自動的にオレンジでハイライトされます。</div>
+
+    <p class="section-label">タイトル</p>
+    <div class="field">
+      <label>商品名（大見出し）</label>
+      <input type="text" id="titleMain" value="ローバーミニ WORK CR">
+    </div>
+    <div class="field">
+      <label>サブタイトル（詳細）</label>
+      <input type="text" id="titleSub" value="グラナイトグリーン　10インチ　4.5J　ホイール＆タイヤセット／ワーク ミニ クーパー">
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">コメント欄</p>
+    <div class="field">
+      <label>コメント本文</label>
+      <textarea id="comment" rows="3">売切り！ ローバーミニ WORK CR グラナイトグリーン 10インチ 4.5J ホイル タイヤセットワーク ミニ クーパー</textarea>
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">商品情報</p>
+    <div class="field">
+      <label>商品名</label>
+      <input type="text" id="itemName" value="ミニ">
+    </div>
+    <div class="field">
+      <label>型番</label>
+      <input type="text" id="itemModel" value="WORK CR">
+    </div>
+    <div class="field">
+      <label>ランク（グレード選択）</label>
+      <div class="grade-picker" id="gradePicker">
+        <button data-grade="S">S</button>
+        <button data-grade="A">A</button>
+        <button data-grade="B" class="active">B</button>
+        <button data-grade="C">C</button>
+        <button data-grade="D">D</button>
+        <button data-grade="J">J</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>備考</label>
+      <input type="text" id="remarks" value="※中古品">
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">注意事項（任意で編集可）</p>
+    <div class="field">
+      <textarea id="notices" rows="10">こちらの商品の送料負担は【落札者様】となります。入札前に必ず送料をご確認下さい。
+この商品の送料は着払いになります。
+写真が全てです。写真をご確認の上、入札をお願い致します。
+商品の色は画像と実物と異なる場合がございますのでご了承下さい。
+営業時間外（平日8:00～17:00以外）及び日曜、祝日は閉店の為、入札の取り消しは出来ません。
+落札後は必ず【48時間以内】に購入手続きをお願い致します。
+発送までの日数は入金確認後1～3営業日以内となります。
+中古品の為、使用感がございます。ご了承の上ご入札下さい。
+落札後の返品・交換はいかなる場合も応じません。
+新規アカウントの方、マイナス評価の多い方の入札は取り消しさせて頂く場合がございます。
+ヤフオクの仕様上、モバイル版では規約の説明欄が適切に表示されない場合がございますので、
+入札と同時に注意事項説明に同意いただいたものとさせていただきます。ご理解のほどよろしくお願いいたします。</textarea>
+      <small>1行＝1項目です。【48時間以内】のように【】で囲むと自動でオレンジ太字になります。</small>
+    </div>
+  </div>
+
+  <div class="preview-pane">
+    <div class="toolbar">
+      <div class="tabs">
+        <button id="tabPreview" class="active">プレビュー</button>
+        <button id="tabCode">HTML</button>
+      </div>
+      <button class="copy-btn" id="copyBtn">HTMLをコピー</button>
+    </div>
+    <div class="pane-body">
+      <iframe id="previewFrame"></iframe>
+      <textarea id="htmlOutput" class="hidden" readonly></textarea>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const grades = ["S","A","B","C","D","J"];
+const gradeText = {
+  S: "キズ・汚れなどもほとんど無く、動作・機能に問題の無い中古品",
+  A: "小さなキズ・汚れなどがありますが、動作・機能には問題の無い中古品",
+  B: "中古とわかる程度のキズ・汚れなどがありますが、動作・機能には問題の無い中古品",
+  C: "一目でわかる大きなキズ・汚れなどがありますが、動作・機能には問題の無い中古品",
+  D: "破損個所や一部動作に支障のある場合がありますが、使用可能な中古品",
+  J: "ジャンク商品"
+};
+let currentGrade = "B";
+
+const els = {
+  titleMain: document.getElementById('titleMain'),
+  titleSub: document.getElementById('titleSub'),
+  comment: document.getElementById('comment'),
+  itemName: document.getElementById('itemName'),
+  itemModel: document.getElementById('itemModel'),
+  remarks: document.getElementById('remarks'),
+  notices: document.getElementById('notices'),
+};
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function noticeLine(line){
+  line = esc(line);
+  line = line.replace(/【(.+?)】/g, '<FONT COLOR="#FF6A00"><B>$1</B></FONT>');
+  return line;
+}
+
+function buildGradeRows(){
+  return grades.map(g => {
+    const active = g === currentGrade;
+    const rowBg = active ? '#FFE3CC' : (grades.indexOf(g)%2===0 ? '#F7F7F7' : '#FFFFFF');
+    const letterColor = '#FF6A00';
+    const letterSize = active ? '3' : '2';
+    const textWeight = active ? '<B>' : '';
+    const textWeightEnd = active ? '</B>' : '';
+    return `<TR><TD WIDTH="8%" BGCOLOR="${rowBg}" ALIGN="CENTER"><FONT FACE="MS PGothic" COLOR="${letterColor}" SIZE="${letterSize}"><B>${g}</B></FONT></TD>
+<TD WIDTH="92%" BGCOLOR="${rowBg}"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">${textWeight}${gradeText[g]}${textWeightEnd}</FONT></TD></TR>`;
+  }).join('\n\n');
+}
+
+function buildNotices(){
+  const lines = els.notices.value.split('\n').map(l => l.trim()).filter(l => l.length);
+  return lines.map(l => '・' + noticeLine(l)).join('<BR>\n');
+}
+
+function buildHTML(){
+  const titleMain = esc(els.titleMain.value);
+  const titleSub = esc(els.titleSub.value);
+  const comment = esc(els.comment.value);
+  const itemName = esc(els.itemName.value);
+  const itemModel = esc(els.itemModel.value);
+  const remarks = esc(els.remarks.value);
+  const gradeRows = buildGradeRows();
+  const notices = buildNotices();
+
+  return `<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+<TR><TD BGCOLOR="#1A1A1A" ALIGN="CENTER">
+<FONT FACE="MS PGothic" SIZE="4" COLOR="#FFFFFF"><B>${titleMain}</B></FONT><BR>
+<FONT FACE="MS PGothic" SIZE="3" COLOR="#FFFFFF">${titleSub}</FONT>
+</TD></TR>
+</TABLE>
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR><TD BGCOLOR="#FF6A00" HEIGHT="4"></TD></TR></TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#FF6A00" CELLPADDING="8" CELLSPACING="0" BGCOLOR="#2B2B2B">
+<TR><TD BGCOLOR="#F7F7F7">
+<FONT FACE="MS PGothic" COLOR="#333333" SIZE="2"><B>コメント</B></FONT><BR>
+<FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">
+${comment}
+</FONT>
+</TD></TR>
+</TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#FF6A00" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#2B2B2B">
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">商品名</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">${itemName}</FONT></TD></TR>
+
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">型番</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">${itemModel}</FONT></TD></TR>
+
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">ランク</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="MS PGothic" COLOR="#FF6A00" SIZE="4"><B>${currentGrade}</B></FONT>　<FONT FACE="MS PGothic" COLOR="#666666" SIZE="2">※下記ランク表参照</FONT></TD></TR>
+
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">備考</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">${remarks}</FONT></TD></TR>
+</TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#FF6A00" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#2B2B2B">
+<TR><TH COLSPAN="2" BGCOLOR="#1A1A1A" ALIGN="LEFT"><FONT FACE="MS PGothic" COLOR="#FFFFFF" SIZE="2"><B>商品ランクについて</B></FONT></TH></TR>
+
+${gradeRows}
+</TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="#FF6A00" CELLSPACING="0" CELLPADDING="8" BGCOLOR="#2B2B2B">
+<TR><TH BGCOLOR="#1A1A1A" ALIGN="CENTER"><FONT FACE="MS PGothic" SIZE="2" COLOR="#FFFFFF"><B>下記オークション注意事項をご一読いただき、同意いただける方のみご入札ください</B></FONT></TH></TR>
+<TR><TD BGCOLOR="#FFFFFF">
+<FONT FACE="MS PGothic" COLOR="#333333" SIZE="2">
+${notices}
+</FONT>
+</TD></TR>
+</TABLE>`;
+}
+
+function render(){
+  const html = buildHTML();
+  document.getElementById('htmlOutput').value = html;
+  const frame = document.getElementById('previewFrame');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(`<div style="padding:20px;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;">${html}</div>`);
+  doc.close();
+}
+
+document.getElementById('gradePicker').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentGrade = btn.dataset.grade;
+  document.querySelectorAll('#gradePicker button').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
+Object.values(els).forEach(el => el.addEventListener('input', render));
+
+document.getElementById('tabPreview').addEventListener('click', () => {
+  document.getElementById('tabPreview').classList.add('active');
+  document.getElementById('tabCode').classList.remove('active');
+  document.getElementById('previewFrame').classList.remove('hidden');
+  document.getElementById('htmlOutput').classList.add('hidden');
+});
+document.getElementById('tabCode').addEventListener('click', () => {
+  document.getElementById('tabCode').classList.add('active');
+  document.getElementById('tabPreview').classList.remove('active');
+  document.getElementById('htmlOutput').classList.remove('hidden');
+  document.getElementById('previewFrame').classList.add('hidden');
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const out = document.getElementById('htmlOutput');
+  out.classList.remove('hidden');
+  document.getElementById('previewFrame').classList.add('hidden');
+  out.select();
+  document.execCommand('copy');
+  const btn = document.getElementById('copyBtn');
+  const original = btn.textContent;
+  btn.textContent = 'コピーしました！';
+  setTimeout(() => { btn.textContent = original; }, 1500);
+  if(!document.getElementById('tabCode').classList.contains('active')){
+    document.getElementById('tabPreview').classList.add('active');
+    out.classList.add('hidden');
+    document.getElementById('previewFrame').classList.remove('hidden');
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
