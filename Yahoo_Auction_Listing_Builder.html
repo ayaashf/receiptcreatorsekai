@@ -3,33 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yahoo Auction Listing Builder</title>
+<title>Yahoo Auction Listing Builder — NSX-R & Parts Edition</title>
 <style>
   :root{
-    --ink:#141414;
-    --panel:#1c1c1c;
+    --ink:#121212;
+    --panel:#1b1b1b;
     --line:#2c2c2c;
-    --paper:#f4f2ee;
-    --accent:#ff6a00;
-    --muted:#8a8a8a;
+    --paper:#ffffff;
+    --accent:#e60012;
+    --muted:#8e8e8e;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;
     background:var(--ink);
     color:#eee;
   }
   header{
-    padding:20px 28px 16px;
+    padding:16px 24px;
     border-bottom:1px solid var(--line);
     display:flex;
     align-items:center;
     gap:14px;
     flex-wrap:wrap;
+    background:#161616;
   }
-  header .bar{width:26px;height:3px;background:var(--accent);flex-shrink:0;}
-  header h1{font-size:16px;margin:0;letter-spacing:.02em;font-weight:700;}
+  header .bar{width:24px;height:4px;background:var(--accent);flex-shrink:0;border-radius:2px;}
+  header h1{font-size:15px;margin:0;letter-spacing:.02em;font-weight:700;}
   header p{margin:2px 0 0;color:var(--muted);font-size:12px;}
 
   .template-switch{
@@ -37,36 +38,84 @@
   }
   .template-switch button{
     background:#111;border:1px solid var(--line);color:#aaa;
-    padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:.03em;
-    border-radius:4px;cursor:pointer;text-transform:uppercase;
+    padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;
+    border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all .15s;
   }
-  .template-switch button.active{background:var(--accent);color:#111;border-color:var(--accent);}
+  .template-switch button:hover{color:#fff;border-color:#444;}
+  .template-switch button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 
-  .layout{display:grid;grid-template-columns:410px 1fr;min-height:calc(100vh - 76px);}
-  @media (max-width:960px){.layout{grid-template-columns:1fr;}}
+  .layout{display:grid;grid-template-columns:460px 1fr;height:calc(100vh - 67px);}
+  @media (max-width:980px){.layout{grid-template-columns:1fr;height:auto;}}
 
-  .form{padding:22px;border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;}
+  .form{
+    padding:20px;border-right:1px solid var(--line);background:var(--panel);
+    overflow-y:auto;height:100%;
+  }
   .field{margin-bottom:16px;}
   .field label{
-    display:block;font-size:11px;color:var(--accent);text-transform:uppercase;
+    display:block;font-size:11px;color:#bbb;text-transform:uppercase;
     letter-spacing:.06em;margin-bottom:6px;font-weight:700;
   }
   .field input[type=text], .field textarea, .field select{
     width:100%;background:#111;border:1px solid var(--line);color:#eee;
-    padding:9px 10px;font-size:13.5px;border-radius:3px;font-family:inherit;resize:vertical;
+    padding:9px 11px;font-size:13px;border-radius:4px;font-family:inherit;resize:vertical;
+    line-height:1.55;
   }
   .field input[type=text]:focus, .field textarea:focus{outline:none;border-color:var(--accent);}
-  .field small{color:var(--muted);font-size:11px;display:block;margin-top:4px;line-height:1.5;}
+  .field small{color:var(--muted);font-size:11px;display:block;margin-top:5px;line-height:1.5;}
 
+  /* --- Rich Text Formatting Toolbar for Vehicle Mode --- */
+  .rich-toolbar{
+    display:flex;flex-wrap:wrap;gap:6px;background:#141414;
+    border:1px solid var(--line);border-bottom:none;
+    padding:8px 10px;border-radius:4px 4px 0 0;align-items:center;
+  }
+  .rt-btn{
+    background:#222;border:1px solid #383838;color:#eee;
+    padding:5px 10px;font-size:11.5px;font-weight:700;border-radius:3px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+    transition:all .12s;
+  }
+  .rt-btn:hover{background:#2d2d2d;border-color:#555;}
+  .rt-btn:active{transform:scale(0.96);}
+  .rt-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .rt-custom-color{
+    display:inline-flex;align-items:center;gap:4px;background:#222;
+    border:1px solid #383838;border-radius:3px;padding:2px 6px;
+  }
+  .rt-custom-color input[type=color]{
+    width:20px;height:20px;border:none;background:none;padding:0;cursor:pointer;
+  }
+  .rich-editor{
+    width:100%;min-height:420px;max-height:540px;overflow-y:auto;
+    background:#ffffff;color:#222222;border:1px solid var(--line);
+    border-radius:0 0 4px 4px;padding:14px 16px;font-size:13.5px;
+    line-height:1.75;outline:none;
+    font-family:"Hiragino Kaku Gothic ProN","Meiryo",Arial,sans-serif;
+  }
+  .rich-editor:focus{border-color:var(--accent);}
+
+  /* --- Slider Row --- */
+  .slider-row{
+    display:flex;align-items:center;gap:12px;background:#111;
+    border:1px solid var(--line);padding:8px 12px;border-radius:4px;
+  }
+  .slider-row input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;}
+  .slider-val{
+    font-family:monospace;font-size:12px;font-weight:700;color:#fff;
+    background:#222;padding:3px 7px;border-radius:3px;min-width:54px;text-align:center;
+  }
+
+  /* --- Legacy Parts/Bike Controls --- */
   .color-row{display:flex;gap:12px;}
   .color-field{flex:1;}
-  .color-field label{display:block;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:700;}
+  .color-field label{display:block;font-size:11px;color:#bbb;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:700;}
   .swatch-input{
     display:flex;align-items:center;gap:8px;background:#111;border:1px solid var(--line);
-    border-radius:3px;padding:6px 8px;
+    border-radius:4px;padding:6px 8px;
   }
   .swatch-input input[type=color]{
-    width:32px;height:32px;border:none;padding:0;background:none;cursor:pointer;border-radius:3px;overflow:hidden;
+    width:30px;height:30px;border:none;padding:0;background:none;cursor:pointer;border-radius:3px;
   }
   .swatch-input span{font-size:12px;color:#ccc;font-family:monospace;}
 
@@ -75,14 +124,14 @@
     padding:9px 0;background:#111;border:1px solid var(--line);color:#ccc;
     font-weight:700;border-radius:3px;cursor:pointer;font-size:13px;
   }
-  .grade-picker button.active{background:var(--accent);border-color:var(--accent);color:#111;}
+  .grade-picker button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
-  .divider{height:1px;background:var(--line);margin:20px 0;}
-  .section-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px;font-weight:700;}
+  .divider{height:1px;background:var(--line);margin:18px 0;}
+  .section-label{font-size:11.5px;color:#888;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;font-weight:700;}
 
-  .toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
-  .toggle-row input{width:auto;}
-  .toggle-row label{margin:0;font-size:12px;color:#ccc;text-transform:none;letter-spacing:0;font-weight:400;}
+  .toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .toggle-row input{width:auto;accent-color:var(--accent);}
+  .toggle-row label{margin:0;font-size:12px;color:#ccc;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer;}
 
   /* --- Image Manager Styles --- */
   .photo-section-header{
@@ -90,8 +139,8 @@
   }
   .photo-section-header .section-label{margin:0;}
   .btn-add-image{
-    background:var(--accent);color:#111;border:none;padding:8px 14px;
-    font-size:12px;font-weight:800;border-radius:4px;cursor:pointer;
+    background:var(--accent);color:#fff;border:none;padding:8px 14px;
+    font-size:12px;font-weight:700;border-radius:4px;cursor:pointer;
     display:inline-flex;align-items:center;gap:6px;letter-spacing:.03em;
     text-transform:uppercase;transition:transform .1s, opacity .15s;
   }
@@ -112,7 +161,7 @@
   }
   .photo-empty{
     background:#141414;border:1px dashed var(--line);border-radius:4px;
-    padding:16px 12px;text-align:center;color:var(--muted);font-size:12px;
+    padding:14px 12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5;
   }
   .photo-item{
     display:flex;align-items:center;gap:10px;background:#111;
@@ -120,11 +169,11 @@
   }
   .photo-thumb{
     width:46px;height:46px;border-radius:3px;object-fit:cover;
-    background:#222;border:1px solid #333;flex-shrink:0;
+    background:#222;flex-shrink:0;
   }
   .photo-meta{flex:1;min-width:0;}
   .photo-badge{
-    display:inline-block;font-size:10px;font-weight:700;color:var(--accent);
+    display:inline-block;font-size:10px;font-weight:700;color:#ff6b6b;
     text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;
   }
   .photo-url{
@@ -142,14 +191,14 @@
 
   /* --- Modal Prompt for Adding Image --- */
   .modal-backdrop{
-    position:fixed;inset:0;background:rgba(0,0,0,0.75);
+    position:fixed;inset:0;background:rgba(0,0,0,0.78);
     display:flex;align-items:center;justify-content:center;z-index:999;
     padding:16px;backdrop-filter:blur(2px);
   }
   .modal-card{
     background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);
     width:100%;max-width:480px;border-radius:6px;padding:20px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.6);
+    box-shadow:0 20px 50px rgba(0,0,0,0.65);
   }
   .modal-title{
     font-size:14px;font-weight:700;color:#fff;margin:0 0 6px;
@@ -170,7 +219,7 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
   }
   .modal-preview-box img{
-    max-width:100%;max-height:160px;border-radius:3px;border:1px solid #333;
+    max-width:100%;max-height:160px;border:none;
   }
   .modal-preview-status{font-size:11px;color:var(--muted);}
   .modal-actions{
@@ -181,28 +230,28 @@
     padding:8px 14px;font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;
   }
   .btn-primary{
-    background:var(--accent);border:1px solid var(--accent);color:#111;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;
     padding:8px 18px;font-size:12px;font-weight:700;border-radius:4px;cursor:pointer;
   }
 
-  .preview-pane{display:flex;flex-direction:column;}
+  .preview-pane{display:flex;flex-direction:column;height:100%;}
   .toolbar{
     display:flex;justify-content:space-between;align-items:center;
-    padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel);
+    padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);
   }
-  .toolbar .tabs{display:flex;gap:2px;}
+  .toolbar .tabs{display:flex;gap:4px;}
   .toolbar .tabs button{
     background:transparent;border:1px solid var(--line);color:#aaa;
-    padding:7px 16px;font-size:12.5px;cursor:pointer;border-radius:3px;
+    padding:7px 16px;font-size:12.5px;cursor:pointer;border-radius:4px;font-weight:600;
   }
-  .toolbar .tabs button.active{background:#111;color:var(--accent);border-color:var(--accent);}
+  .toolbar .tabs button.active{background:#111;color:#fff;border-color:var(--accent);}
   .copy-btn{
-    background:var(--accent);color:#111;border:none;padding:9px 18px;
-    font-size:12.5px;font-weight:700;border-radius:3px;cursor:pointer;letter-spacing:.02em;
+    background:var(--accent);color:#fff;border:none;padding:9px 18px;
+    font-size:12.5px;font-weight:700;border-radius:4px;cursor:pointer;letter-spacing:.02em;
   }
   .copy-btn:active{transform:scale(.97);}
   .pane-body{flex:1;overflow:auto;background:var(--paper);}
-  #previewFrame{width:100%;height:100%;border:none;background:var(--paper);}
+  #previewFrame{width:100%;height:100%;border:none;background:#ffffff;}
   #htmlOutput{
     width:100%;height:100%;border:none;background:#0d0d0d;color:#c7ffb3;
     font-family:"SF Mono",Consolas,monospace;font-size:12px;line-height:1.6;
@@ -210,8 +259,8 @@
   }
   .hidden{display:none !important;}
   .hint{
-    background:#241505;border:1px solid #7a3a10;color:#ffb87a;
-    padding:10px 12px;border-radius:4px;font-size:12px;line-height:1.6;margin-bottom:18px;
+    background:#1f1617;border:1px solid #5c2227;color:#ffafb5;
+    padding:10px 12px;border-radius:4px;font-size:12px;line-height:1.55;margin-bottom:16px;
   }
 </style>
 </head>
@@ -221,11 +270,11 @@
   <div class="bar"></div>
   <div>
     <h1>Yahoo Auction Listing Builder</h1>
-    <p>Edit on the left → check Preview → copy the HTML tab into your Yahoo Auction description box</p>
+    <p>Vehicle Mode: Borderless Rich-Text & Centered Bottom Photos (No Image Borders) | Parts & Bike Mode</p>
   </div>
   <div class="template-switch" id="templateSwitch">
-    <button data-tpl="PARTS" class="active">Parts</button>
-    <button data-tpl="VEHICLE">Vehicle</button>
+    <button data-tpl="VEHICLE" class="active">Vehicle (NSX-R)</button>
+    <button data-tpl="PARTS">Parts</button>
     <button data-tpl="BIKE">Bike</button>
   </div>
 </header>
@@ -233,47 +282,139 @@
 <div class="layout">
 
   <div class="form">
-    <div class="hint">Tap a grade letter (S–J) and that row auto-highlights below. Use <b>+ Add Image</b> to paste any direct image URL (or ImageUp HTML block) and it will render immediately in the description.</div>
 
-    <p class="section-label">Color Theme</p>
-    <div class="color-row">
-      <div class="color-field">
-        <label>Accent Color</label>
-        <div class="swatch-input">
-          <input type="color" id="accentColor" value="#ff6a00">
-          <span id="accentColorLabel">#FF6A00</span>
+    <!-- ========================================================== -->
+    <!-- VEHICLE MODE CONTROL PANEL (NO GRADES, NO TABLE BORDERS)   -->
+    <!-- ========================================================== -->
+    <div id="vehicleControlPanel">
+      <div class="hint">
+        <b>Vehicle Mode (NSX-R):</b> No grade table or box borders. Highlight any text below and click the toolbar buttons to make words <b>Bold</b> or change their <b>Color</b>. Added photos stack cleanly at the <b>very bottom</b> of the HTML with <b>zero borders</b>.
+      </div>
+
+      <div class="field">
+        <label>Top Title Line (Optional Headline)</label>
+        <input type="text" id="vehHeadline" value="【希少車】1994年 ホンダ NSX タイプR NA1 本物 NSX-R R-02** 5速MT チャンピオンシップホワイト 走行43,915km 2オーナー オリジナル塗装 修復歴なし">
+      </div>
+
+      <div class="field">
+        <label>Vehicle Description (Select text to Bold or Color)</label>
+        <div class="rich-toolbar">
+          <button type="button" class="rt-btn" data-cmd="bold" title="Bold selected text"><b>B</b> Bold</button>
+          <button type="button" class="rt-btn" data-color="#D00000" title="Crimson Red"><span class="rt-dot" style="background:#D00000;"></span>Red</button>
+          <button type="button" class="rt-btn" data-color="#0051A8" title="Royal Blue"><span class="rt-dot" style="background:#0051A8;"></span>Blue</button>
+          <button type="button" class="rt-btn" data-color="#B86B00" title="Amber Gold"><span class="rt-dot" style="background:#B86B00;"></span>Gold</button>
+          <button type="button" class="rt-btn" data-color="#222222" title="Default Black"><span class="rt-dot" style="background:#222222;border:1px solid #666;"></span>Black</button>
+          <div class="rt-custom-color" title="Pick Custom Text Color">
+            <input type="color" id="vehCustomColor" value="#d00000">
+            <button type="button" class="rt-btn" id="applyCustomColorBtn" style="padding:3px 7px;border:none;">Apply</button>
+          </div>
+          <button type="button" class="rt-btn" id="rtHeadingBtn" title="Make selected text larger">Large Text</button>
+          <button type="button" class="rt-btn" id="rtClearBtn" title="Remove formatting on selection">Clear Style</button>
+        </div>
+        <div id="vehRichEditor" class="rich-editor" contenteditable="true" spellcheck="false"></div>
+        <small>Tip: You can edit the Japanese text directly above, highlight any phrase (like <code>48時間以内</code> or <code>100,000円</code>), and click <b>Bold</b> or <b>Red</b>.</small>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- PARTS & BIKE MODE CONTROL PANEL                            -->
+    <!-- ========================================================== -->
+    <div id="partsControlPanel" class="hidden">
+      <div class="hint">Tap a grade letter (S–J) and that row auto-highlights. Use <b>+ Add Image</b> below to insert borderless photos.</div>
+
+      <p class="section-label">Color Theme</p>
+      <div class="color-row">
+        <div class="color-field">
+          <label>Accent Color</label>
+          <div class="swatch-input">
+            <input type="color" id="accentColor" value="#ff6a00">
+            <span id="accentColorLabel">#FF6A00</span>
+          </div>
+        </div>
+        <div class="color-field">
+          <label>Header Color</label>
+          <div class="swatch-input">
+            <input type="color" id="headerColor" value="#1a1a1a">
+            <span id="headerColorLabel">#1A1A1A</span>
+          </div>
         </div>
       </div>
-      <div class="color-field">
-        <label>Header Color</label>
-        <div class="swatch-input">
-          <input type="color" id="headerColor" value="#1a1a1a">
-          <span id="headerColorLabel">#1A1A1A</span>
+
+      <div class="divider"></div>
+      <p class="section-label">Title</p>
+      <div class="field">
+        <label>Main Title</label>
+        <input type="text" id="titleMain" value="ローバーミニ WORK CR">
+      </div>
+      <div class="field">
+        <label>Subtitle / Details</label>
+        <input type="text" id="titleSub" value="グラナイトグリーン　10インチ　4.5J　ホイール＆タイヤセット／ワーク ミニ クーパー">
+      </div>
+
+      <div class="divider"></div>
+      <p class="section-label">Comment</p>
+      <div class="field">
+        <textarea id="comment" rows="3">売切り！ ローバーミニ WORK CR グラナイトグリーン 10インチ 4.5J ホイル タイヤセットワーク ミニ クーパー</textarea>
+      </div>
+
+      <div class="divider"></div>
+      <p class="section-label">Item Info</p>
+      <div class="field">
+        <label>Product Name</label>
+        <input type="text" id="itemName" value="ミニ">
+      </div>
+      <div class="field">
+        <label>Model</label>
+        <input type="text" id="itemModel" value="WORK CR">
+      </div>
+      <div class="field">
+        <label>Grade</label>
+        <div class="grade-picker" id="gradePicker">
+          <button data-grade="S">S</button>
+          <button data-grade="A">A</button>
+          <button data-grade="B" class="active">B</button>
+          <button data-grade="C">C</button>
+          <button data-grade="D">D</button>
+          <button data-grade="J">J</button>
         </div>
+      </div>
+      <div class="field">
+        <label>Remarks</label>
+        <input type="text" id="remarks" value="※中古品">
+      </div>
+
+      <div class="divider"></div>
+      <p class="section-label">Footer / Terms</p>
+      <div class="toggle-row">
+        <input type="checkbox" id="bulletMode" checked>
+        <label for="bulletMode">Show as bulleted list</label>
+      </div>
+      <div class="field">
+        <textarea id="notices" rows="10"></textarea>
+        <small>Wrap a word in [[double brackets]] to auto-bold it in your accent color.</small>
+      </div>
+      <div class="field">
+        <label>Contact Phone (optional)</label>
+        <input type="text" id="phone" value="">
       </div>
     </div>
 
-    <div class="divider"></div>
-    <p class="section-label">Title</p>
-    <div class="field">
-      <label>Main Title</label>
-      <input type="text" id="titleMain" value="ローバーミニ WORK CR">
-    </div>
-    <div class="field">
-      <label>Subtitle / Details</label>
-      <input type="text" id="titleSub" value="グラナイトグリーン　10インチ　4.5J　ホイール＆タイヤセット／ワーク ミニ クーパー">
-    </div>
-
-    <div class="divider"></div>
-    <p class="section-label">Comment</p>
-    <div class="field">
-      <textarea id="comment" rows="3">売切り！ ローバーミニ WORK CR グラナイトグリーン 10インチ 4.5J ホイル タイヤセットワーク ミニ クーパー</textarea>
-    </div>
-
+    <!-- ========================================================== -->
+    <!-- SHARED PHOTO MANAGER (BOTTOM CENTERED & BORDERLESS)        -->
+    <!-- ========================================================== -->
     <div class="divider"></div>
     <div class="photo-section-header">
-      <p class="section-label">Photos in Description</p>
+      <p class="section-label">Photos in Description (Bottom & Borderless)</p>
       <button type="button" class="btn-add-image" id="openAddImageBtn">+ Add Image</button>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Centered Image Width (Compact Style like Screenshot)</label>
+      <div class="slider-row">
+        <input type="range" id="imgWidthSlider" min="240" max="680" step="10" value="380">
+        <span class="slider-val" id="imgWidthLabel">380px</span>
+      </div>
+      <small>Images are placed at the <b>bottom</b> of the HTML description, centered with <code>border="0"</code> and no frames around them.</small>
     </div>
 
     <div class="photo-actions-sub">
@@ -291,51 +432,14 @@
     <div class="field hidden" id="rawUrlsField">
       <label>Image URLs (one per line)</label>
       <textarea id="images" rows="4" placeholder="https://yourwebsite.com/photo1.jpg&#10;https://yourwebsite.com/photo2.jpg"></textarea>
-      <small>You can also bulk-edit URLs here. Each line renders as a framed image inside the description.</small>
+      <small>Paste direct image links (one per line) or ImageUp HTML code.</small>
     </div>
 
-    <div class="divider"></div>
-    <p class="section-label">Item Info</p>
-    <div class="field">
-      <label>Product Name</label>
-      <input type="text" id="itemName" value="ミニ">
-    </div>
-    <div class="field">
-      <label>Model</label>
-      <input type="text" id="itemModel" value="WORK CR">
-    </div>
-    <div class="field">
-      <label>Grade</label>
-      <div class="grade-picker" id="gradePicker">
-        <button data-grade="S">S</button>
-        <button data-grade="A">A</button>
-        <button data-grade="B" class="active">B</button>
-        <button data-grade="C">C</button>
-        <button data-grade="D">D</button>
-        <button data-grade="J">J</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Remarks</label>
-      <input type="text" id="remarks" value="※中古品">
-    </div>
-
-    <div class="divider"></div>
-    <p class="section-label">Footer / Terms</p>
-    <div class="toggle-row">
-      <input type="checkbox" id="bulletMode" checked>
-      <label for="bulletMode">Show as bulleted list (untick for plain paragraphs — used for the Vehicle/Bike footer style)</label>
-    </div>
-    <div class="field">
-      <textarea id="notices" rows="12"></textarea>
-      <small>One line = one item. Wrap a word in [[double brackets]] to auto-bold it in your accent color, e.g. [[within 48 hours]].</small>
-    </div>
-    <div class="field">
-      <label>Contact Phone (optional)</label>
-      <input type="text" id="phone" value="">
-    </div>
   </div>
 
+  <!-- ========================================================== -->
+  <!-- RIGHT PREVIEW & HTML CODE OUTPUT                           -->
+  <!-- ========================================================== -->
   <div class="preview-pane">
     <div class="toolbar">
       <div class="tabs">
@@ -356,11 +460,11 @@
 <div class="modal-backdrop hidden" id="imageModal">
   <div class="modal-card">
     <div class="modal-title">
-      <span>Add Image to Description</span>
+      <span>Add Image to Description (Borderless)</span>
       <button type="button" class="icon-btn" id="closeModalX" title="Close">✕</button>
     </div>
     <p class="modal-desc">
-      Paste the direct image link (e.g. <code>https://.../photo.jpg</code>) or paste an entire HTML snippet from <b>ImageUp (いめーじあっぷ)</b>. It will automatically show in your description upon pasting!
+      Paste the direct image link (e.g. <code>https://.../photo.jpg</code>) or paste an entire HTML snippet from <b>ImageUp (いめーじあっぷ)</b>. It will immediately appear centered at the bottom of your description without any borders!
     </p>
     <input
       type="text"
@@ -384,6 +488,149 @@
 </div>
 
 <script>
+/* ============================================================================
+   PRE-LOADED 1994 HONDA NSX TYPE R (NA1) DESCRIPTION FROM UPLOADED PDF
+   ============================================================================ */
+const initialNsxDescriptionHTML = `<font size="4" color="#111111"><b>■ 車両基本情報</b></font><br>
+<b>車名:</b> ホンダ NSX タイプR (NSX-R)<br>
+<b>年式:</b> 平成6年(1994年)<br>
+<b>初度登録:</b> 平成6年3月16日<br>
+<b>型式:</b> E-NA1<br>
+<b>車台番号:</b> NA1-120****<br>
+<b>NSX-R シリアルナンバー:</b> <font color="#D00000"><b>R-02**</b></font><br>
+<b>ボディカラー:</b> チャンピオンシップホワイト<br>
+<b>内装:</b> <font color="#D00000"><b>純正レッドレカロバケットシート</b></font><br>
+<b>エンジン:</b> 3.0L V型6気筒 DOHC VTEC<br>
+<b>最高出力:</b> 280PS (メーカー公表値)<br>
+<b>ミッション:</b> 純正5速マニュアル<br>
+<b>駆動方式:</b> MR(ミッドシップ・後輪駆動)<br>
+<b>走行距離:</b> <font color="#0051A8"><b>約43,933km (メーター表示)</b></font><br>
+<b>所有歴:</b> <font color="#0051A8"><b>2オーナーと申告</b></font><br>
+<b>修復歴:</b> <font color="#D00000"><b>なし(申告による)</b></font><br>
+<b>塗装:</b> <font color="#0051A8"><b>オリジナル・チャンピオンシップホワイト(申告による)</b></font><br>
+<b>付属書類:</b> 日本国内の整備記録簿<br>
+<br>
+<font size="4" color="#111111"><b>■ 世界的にも希少な初代NSXタイプR</b></font><br>
+この度は、当社出品車両をご覧いただき、誠にありがとうございます。<br>
+今回ご紹介する車両は、<b>1994年式 ホンダ NSX タイプR (NA1)、シリアルナンバー <font color="#D00000">R-02**</font></b>の大変希少な1台です。<br>
+1992年11月に登場した初代NSX-Rは、ホンダが誇るスーパースポーツ「NSX」をベースに、徹底した軽量化と走行性能の向上を追求して開発された、日本国内向けの特別な高性能モデルです。<br>
+初代NSX-Rの生産台数は、1992年から1995年までに<b>約483台</b>と広く伝えられており、現在では国内外のコレクターから非常に高い評価を受けています。<br>
+通常のNSXとは異なり、軽量化された専用装備、専用サスペンションセッティング、精密なエンジンバランス調整など、ホンダの技術と情熱が惜しみなく注ぎ込まれた特別なモデルです。<br>
+近年、初代NSX-Rは海外市場でも注目度が高まっており、良好な個体を入手する機会はますます限られています。<br>
+<br>
+<font size="4" color="#111111"><b>■ 約30年間にわたる長期所有歴</b></font><br>
+本車両の大きな魅力のひとつが、その所有履歴です。<br>
+本車両は1994年3月16日に千葉県で初度登録され、最初のオーナー様によって新車購入されたと伝えられています。<br>
+その後、1997年11月9日に群馬県の2人目のオーナー様へ名義変更されました。<br>
+当時の記録による走行距離は、わずか<b>28,512km</b>でした。<br>
+それ以降、<font color="#0051A8"><b>約29年間にわたり同じオーナー様によって大切に所有されてきた車両です。</b></font><br>
+現在のメーター表示は<b>約43,933km</b>。<br>
+1997年の名義変更時から現在までの走行距離の増加は、わずか<b>約15,421km</b>となります。<br>
+長期間にわたって所有されてきた初代NSX-Rは、今となっては非常に貴重な存在です。<br>
+<font color="#666666">※上記の所有履歴および走行距離は、当方が把握している記録・情報に基づくものです。詳細については現車および関係書類をご確認ください。</font><br>
+<br>
+<font size="4" color="#111111"><b>■ 希少なオリジナル・チャンピオンシップホワイト</b></font><br>
+本車両は、NSX-Rを象徴する<b>チャンピオンシップホワイト</b>のボディカラーです。<br>
+特筆すべき点は、<font color="#D00000"><b>外装が新車時からのオリジナル塗装を維持しているとされることです。</b></font><br>
+販売者からの申告では、<b>事故歴および骨格部分の修復歴はなく</b>、長年にわたりオリジナルの状態を大切に維持してきた車両です。<br>
+約32年が経過した車両でありながら、当時の雰囲気を色濃く残している点は、コレクターの方にも注目していただきたいポイントです。<br>
+なお、経年による小傷、汚れ、色あせ、使用感などにつきましては、年式相応にございます。<br>
+外装の状態につきましては、必ず掲載写真および現車にてご確認ください。<br>
+<br>
+<font size="4" color="#111111"><b>■ 純正NSX-R専用装備</b></font><br>
+本車両には、初代NSX-Rを象徴する数々の純正装備が残されています。<br>
+<b>【主な装備】</b><br>
+・<font color="#D00000"><b>純正レッドレカロ製軽量バケットシート</b></font><br>
+・<b>純正MOMO製3本スポークステアリング</b><br>
+・<b>純正NSX-Rアルミホイール</b><br>
+・<b>フロント16インチ / リア17インチ</b><br>
+・<b>純正5速マニュアルトランスミッション</b><br>
+・<b>3.0L DOHC VTECエンジン</b><br>
+・<b>純正エアコン装備</b><br>
+・<b>純正オーディオ装備</b><br>
+・<b>NSX-Rシリアルナンバー R-02**</b><br>
+特に、純正レッドレカロシートはNSX-Rを代表する非常に重要な装備です。<br>
+シート生地には経年による若干の色あせが見られますが、オリジナルの状態を維持しております。<br>
+純正MOMOステアリングとともに、初代NSX-Rならではの特別な室内空間をお楽しみいただけます。<br>
+<br>
+<font size="4" color="#111111"><b>■ エンジン・足回りについて</b></font><br>
+搭載されるエンジンは、ホンダが誇る<b>3.0L V型6気筒DOHC VTECエンジン</b>です。<br>
+メーカー公表最高出力280PSを発揮し、5速マニュアルトランスミッションとの組み合わせにより、初代NSX-Rならではのダイレクトなドライビングを実現しています。<br>
+NSX-Rは、通常モデルと比較して徹底した軽量化と専用チューニングが施されており、現在でも高く評価されるモデルです。<br>
+<b>【サスペンションについて】</b><br>
+本車両は、純正サスペンションから社外品サスペンションへ交換しております。<br>
+<font color="#D00000">取り外した純正サスペンションは付属いたしません。</font><br>
+足回りの詳細および現在の状態につきましては、現車確認をお願いいたします。<br>
+また、車両には<b>日本国内の整備記録簿</b>が付属いたします。<br>
+<br>
+<font size="4" color="#111111"><b>■ コレクターの方にもおすすめの希少車</b></font><br>
+初代NSX-Rは、ホンダのスポーツカー史において極めて重要な位置を占める特別なモデルです。<br>
+その中でも本車両は、<br>
+・<b>1994年式の希少な初代NSX-R</b><br>
+・<b>シリアルナンバー R-02**</b><br>
+・<b>チャンピオンシップホワイト</b><br>
+・<b>オリジナル塗装と申告される外装</b><br>
+・<b>純正レッドレカロシート</b><br>
+・<b>純正MOMOステアリング</b><br>
+・<b>純正16/17インチホイール</b><br>
+・<b>約43,933kmのメーター表示</b><br>
+・<b>2オーナーとされる所有履歴</b><br>
+・<b>1997年から約29年間の長期所有歴</b><br>
+・<b>修復歴なしとの申告</b><br>
+・<b>国内整備記録簿付き</b><br>
+という、非常に魅力的な条件を備えた1台です。<br>
+このような履歴とオリジナル装備を持つ初代NSX-Rは、今後さらに入手が難しくなる可能性がございます。<br>
+国内のNSX愛好家の方はもちろん、希少な日本製スポーツカーをお探しのコレクターの方にも、ぜひご検討いただきたい車両です。<br>
+この貴重な機会に、ぜひご入札をご検討ください。<br>
+<br>
+<font size="4" color="#111111"><b>■ 現車確認・車両状態について</b></font><br>
+本車両は約32年前に製造された中古車となります。<br>
+年式相応の経年劣化、傷、汚れ、色あせ、部品の消耗などがございます。<br>
+旧車・希少車の特性をご理解いただいたうえで、ご入札をお願いいたします。<br>
+当方の説明は把握している情報に基づいておりますが、車両のすべての状態を保証するものではございません。<br>
+特にオリジナル塗装、修復歴、走行距離、純正部品の状態などにつきましては、入札前に現車および書類をご確認いただくことをおすすめいたします。<br>
+<font color="#0051A8"><b>現車確認は大歓迎です。</b></font><br>
+高額かつ希少な車両となりますので、可能な限りご入札前に現車確認をお願いいたします。<br>
+写真では確認できない部分もございますので、ご不明な点は事前にお問い合わせください。<br>
+<br>
+<font size="4" color="#111111"><b>■ お支払いについて</b></font><br>
+<font color="#D00000"><b>落札後48時間以内にお支払いをお願いいたします。</b></font><br>
+落札後は速やかに取引連絡をお願いいたします。<br>
+お支払い方法および車両引渡しについては、落札後にご案内いたします。<br>
+お支払いが確認できない場合は、取引を中止させていただく場合がございます。<br>
+<br>
+<font size="4" color="#111111"><b>■ ご入札に関する重要事項</b></font><br>
+<font color="#D00000"><b>ノークレーム、ノーリターン、ノーキャンセルを守れる方のみご入札願います。</b></font><br>
+入札された場合は上記の内容に承諾したものとします。<br>
+落札後のキャンセル及び、間違えて落札した場合はいかなる場合でも<font color="#D00000"><b>キャンセル料として100,000円</b></font>頂戴いたしますのでご了承ください。<br>
+※上記は法令およびYahoo!オークションの規約に反しない範囲で適用されるものとします。<br>
+中古車・旧車のため、車両状態について十分にご理解いただき、慎重にご入札ください。<br>
+入札前にご不明な点がございましたら、必ずお問い合わせください。<br>
+<br>
+<font size="4" color="#111111"><b>■ 予備検査・陸送について</b></font><br>
+予備検査もお受けできますので、お気軽にご相談ください。<br>
+※予備検査には別途手数料がかかります。<br>
+全国への陸送につきましても、ご相談を承っております。<br>
+陸送費用はお届け先や輸送条件によって異なりますので、事前にお問い合わせください。<br>
+お引き取り方法、陸送、予備検査など、何でもお気軽にご相談ください。<br>
+<br>
+<font size="4" color="#111111"><b>■ オークション出品について</b></font><br>
+本車両は、Yahoo!オークション以外でも商談を行っております。<br>
+そのため、商談の状況により、<font color="#D00000"><b>オークションを早期終了または出品取り消し</b></font>とさせていただく場合がございます。<br>
+あらかじめご了承ください。<br>
+希少車両につき、真剣に購入をご検討いただける方からのお問い合わせをお待ちしております。<br>
+<br>
+<font size="4" color="#111111"><b>■ お問い合わせ</b></font><br>
+車両の詳細、現車確認、予備検査、陸送などについては、お気軽にお問い合わせください。<br>
+お急ぎの方はお電話ください。<br>
+<font size="4" color="#D00000"><b>TEL: 080-5110-1134</b></font><br>
+<br>
+最後までご覧いただき、誠にありがとうございます。<br>
+<b>1994年式 ホンダ NSX タイプR (NA1)</b><br>
+<b>車台番号 NA1-120**** / シリアル R-02**</b><br>
+大変希少な初代NSX-Rです。<br>
+この機会にぜひご検討いただきますよう、よろしくお願い申し上げます。`;
+
 const grades = ["S","A","B","C","D","J"];
 const gradeText = {
   S: "キズ・汚れなどもほとんど無く、動作・機能に問題の無い中古品",
@@ -394,7 +641,7 @@ const gradeText = {
   J: "ジャンク商品"
 };
 let currentGrade = "B";
-let currentTemplate = "PARTS";
+let currentTemplate = "VEHICLE";
 
 const defaultNotices = {
 PARTS: `こちらの商品の送料負担は【[[落札者様]]】となります。入札前に必ず送料をご確認下さい。
@@ -405,35 +652,19 @@ PARTS: `こちらの商品の送料負担は【[[落札者様]]】となりま�
 落札後は必ず[[48時間以内]]に購入手続きをお願い致します。
 発送までの日数は入金確認後1～3営業日以内となります。
 中古品の為、使用感がございます。ご了承の上ご入札下さい。
-落札後の返品・交換はいかなる場合も応じません。
-新規アカウントの方、マイナス評価の多い方の入札は取り消しさせて頂く場合がございます。
-ヤフオクの仕様上、モバイル版では規約の説明欄が適切に表示されない場合がございますので、
-入札と同時に注意事項説明に同意いただいたものとさせていただきます。ご理解のほどよろしくお願いいたします。`,
-VEHICLE: `現車優先・現状販売となりますので、できる限り現車確認をお願いいたします。
-
-落札後はいかなる理由がありましても現状渡し・ノークレーム・ノーリターンでお願いいたします。
-
-また、落札後[[48時間以内]]にお支払い可能な方のみご入札ください。
-
-期限内にご入金が確認できない場合は、落札者都合によるキャンセルとさせていただき、悪い評価を付けさせていただく場合がございますのでご了承ください。
-
-ご不明な点がございましたら、お気軽にお問い合わせください。
-
-よろしくお願いいたします。`,
+落札後の返品・交換はいかなる場合も応じません。`,
 BIKE: `現車優先・現状販売となりますので、できる限り現車確認をお願いいたします。
 
 落札後はいかなる理由がありましても現状渡し・ノークレーム・ノーリターンでお願いいたします。
 
-また、落札後[[48時間以内]]にお支払い可能な方のみご入札ください。
-
-期限内にご入金が確認できない場合は、落札者都合によるキャンセルとさせていただき、悪い評価を付けさせていただく場合がございますのでご了承ください。
-
-ご不明な点がございましたら、お気軽にお問い合わせください。
-
-よろしくお願いいたします。`
+また、落札後[[48時間以内]]にお支払い可能な方のみご入札ください。`
 };
 
 const els = {
+  vehHeadline: document.getElementById('vehHeadline'),
+  vehRichEditor: document.getElementById('vehRichEditor'),
+  imgWidthSlider: document.getElementById('imgWidthSlider'),
+  imgWidthLabel: document.getElementById('imgWidthLabel'),
   titleMain: document.getElementById('titleMain'),
   titleSub: document.getElementById('titleSub'),
   comment: document.getElementById('comment'),
@@ -448,6 +679,8 @@ const els = {
   headerColor: document.getElementById('headerColor'),
 };
 
+// Initialize content
+els.vehRichEditor.innerHTML = initialNsxDescriptionHTML;
 els.notices.value = defaultNotices.PARTS;
 
 function esc(s){
@@ -470,11 +703,10 @@ function lighten(hex, t){
   return rgbToHex(r+(255-r)*t, g+(255-g)*t, b+(255-b)*t);
 }
 
-/* --- Helper: Extract URLs from either direct link(s) or <img src="..."> HTML tags --- */
+/* --- Extract URLs from either direct link(s) or <img src="..."> HTML tags --- */
 function extractUrlsFromInput(rawText){
   if(!rawText) return [];
   const urls = [];
-  // Check if user pasted HTML containing <img ... src="...">
   const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
   let match;
   while((match = imgRegex.exec(rawText)) !== null){
@@ -484,7 +716,6 @@ function extractUrlsFromInput(rawText){
   }
   if(urls.length > 0) return urls;
 
-  // Otherwise split by newlines or spaces if multiple URLs were pasted
   return rawText
     .split(/[\r\n]+/)
     .map(u => u.trim())
@@ -511,15 +742,15 @@ function renderPhotoListUI(){
   countLabel.textContent = `${urls.length} photo${urls.length === 1 ? '' : 's'} added`;
 
   if(urls.length === 0){
-    listEl.innerHTML = `<div class="photo-empty">No photos in description yet. Click <b>+ Add Image</b> above to paste a direct image URL.</div>`;
+    listEl.innerHTML = `<div class="photo-empty">No photos added yet.<br>Click <b>+ Add Image</b> above to paste a direct image URL or ImageUp code.</div>`;
     return;
   }
 
   listEl.innerHTML = urls.map((url, idx) => `
     <div class="photo-item">
-      <img class="photo-thumb" src="${esc(url)}" alt="Photo ${idx + 1}" onerror="this.src='https://placehold.co/80x80/222222/ff6a00?text=IMG'">
+      <img class="photo-thumb" src="${esc(url)}" alt="Photo ${idx + 1}" onerror="this.src='https://placehold.co/80x80/222222/e60012?text=IMG'">
       <div class="photo-meta">
-        <span class="photo-badge">Photo #${idx + 1}</span>
+        <span class="photo-badge">Bottom Photo #${idx + 1}</span>
         <div class="photo-url" title="${esc(url)}">${esc(url)}</div>
       </div>
       <div class="photo-controls">
@@ -531,6 +762,38 @@ function renderPhotoListUI(){
   `).join('');
 }
 
+/* ============================================================================
+   BORDERLESS CENTERED BOTTOM IMAGES BUILDER (USED BY VEHICLE & PARTS/BIKE)
+   ============================================================================ */
+function buildBorderlessCenteredImages(){
+  const urls = getCurrentImageList();
+  if(!urls.length) return '';
+  const widthPx = els.imgWidthSlider.value;
+  const imgTags = urls.map(u => `<img src="${esc(u)}" width="${widthPx}" border="0"><br><br>`).join('\n');
+  return `\n<br><br>\n<div align="center">\n${imgTags}\n</div>`;
+}
+
+/* ============================================================================
+   VEHICLE MODE HTML BUILDER (CLEAN, NO TABLE BORDERS, IMAGES AT BOTTOM)
+   ============================================================================ */
+function buildVehicleHTML(){
+  const headline = els.vehHeadline.value.trim();
+  const headlineBlock = headline
+    ? `<font size="4" color="#111111"><b>${esc(headline)}</b></font><br><br>\n`
+    : '';
+  const bodyHtml = els.vehRichEditor.innerHTML;
+  const bottomImages = buildBorderlessCenteredImages();
+
+  return `<div align="left">
+<font face="Hiragino Kaku Gothic ProN, Meiryo, Arial, sans-serif" size="3" color="#222222">
+${headlineBlock}${bodyHtml}
+</font>
+</div>${bottomImages}`;
+}
+
+/* ============================================================================
+   PARTS / BIKE MODE HTML BUILDER (ZERO IMAGE BORDERS)
+   ============================================================================ */
 function noticeLine(line){
   line = esc(line);
   const accent = els.accentColor.value.toUpperCase();
@@ -571,31 +834,7 @@ function buildNotices(){
   }
 }
 
-/* --- Matches the exact Table + Header + Accent Border style of the description --- */
-function buildImages(){
-  const accent = els.accentColor.value.toUpperCase();
-  const headerColor = els.headerColor.value.toUpperCase();
-  const urls = getCurrentImageList();
-  if(!urls.length) return '';
-
-  const imgs = urls.map((u, idx) => {
-    const spacer = idx < urls.length - 1
-      ? `\n<TR><TD HEIGHT="8" BGCOLOR="#F2F2F2"></TD></TR>`
-      : '';
-    return `<TR><TD BGCOLOR="#FFFFFF" ALIGN="CENTER"><IMG SRC="${esc(u)}" WIDTH="100%" BORDER="0" ALT="商品画像 ${idx + 1}"></TD></TR>${spacer}`;
-  }).join('\n');
-
-  return `<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="8" BGCOLOR="#2B2B2B">
-<TR><TH BGCOLOR="${headerColor}" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#FFFFFF" SIZE="2"><B>商品画像</B></FONT></TH></TR>
-${imgs}
-</TABLE>
-
-<BR>
-
-`;
-}
-
-function buildHTML(){
+function buildPartsOrBikeHTML(){
   const accent = els.accentColor.value.toUpperCase();
   const headerColor = els.headerColor.value.toUpperCase();
   const titleMain = esc(els.titleMain.value);
@@ -606,7 +845,7 @@ function buildHTML(){
   const remarks = esc(els.remarks.value);
   const gradeRows = buildGradeRows();
   const notices = buildNotices();
-  const imagesBlock = buildImages();
+  const bottomImages = buildBorderlessCenteredImages();
   const phone = els.phone.value.trim();
   const phoneBlock = phone ? `<BR><BR><FONT FACE="Arial" COLOR="${accent}" SIZE="3"><B>携帯電話：${esc(phone)}</B></FONT>` : '';
 
@@ -631,7 +870,7 @@ ${comment}
 
 <BR>
 
-${imagesBlock}<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#2B2B2B">
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#2B2B2B">
 <TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#333333" SIZE="2">商品名</FONT></TH>
 <TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="Arial" COLOR="#333333" SIZE="2">${itemName}</FONT></TD></TR>
 
@@ -662,7 +901,14 @@ ${gradeRows}
 ${notices}${phoneBlock}
 </FONT>
 </TD></TR>
-</TABLE>`;
+</TABLE>${bottomImages}`;
+}
+
+function buildHTML(){
+  if(currentTemplate === 'VEHICLE'){
+    return buildVehicleHTML();
+  }
+  return buildPartsOrBikeHTML();
 }
 
 function render(){
@@ -671,11 +917,70 @@ function render(){
   const frame = document.getElementById('previewFrame');
   const doc = frame.contentDocument || frame.contentWindow.document;
   doc.open();
-  doc.write(`<div style="padding:20px;font-family:Arial,sans-serif;">${html}</div>`);
+  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body { margin: 0; padding: 28px 32px; background: #ffffff; color: #222222; font-family: "Hiragino Kaku Gothic ProN", "Meiryo", Arial, sans-serif; line-height: 1.75; }
+    img { border: 0 !important; box-shadow: none !important; outline: none !important; max-width: 100%; height: auto; }
+  </style></head><body>${html}</body></html>`);
   doc.close();
 }
 
-/* --- Add Image Modal Logic --- */
+/* ============================================================================
+   RICH TEXT TOOLBAR ACTIONS (VEHICLE MODE)
+   ============================================================================ */
+document.execCommand('styleWithCSS', false, false);
+
+document.querySelectorAll('.rich-toolbar [data-cmd]').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.preventDefault());
+  btn.addEventListener('click', () => {
+    els.vehRichEditor.focus();
+    document.execCommand(btn.dataset.cmd, false, null);
+    render();
+  });
+});
+
+document.querySelectorAll('.rich-toolbar [data-color]').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.preventDefault());
+  btn.addEventListener('click', () => {
+    els.vehRichEditor.focus();
+    document.execCommand('foreColor', false, btn.dataset.color);
+    render();
+  });
+});
+
+document.getElementById('applyCustomColorBtn').addEventListener('mousedown', e => e.preventDefault());
+document.getElementById('applyCustomColorBtn').addEventListener('click', () => {
+  const color = document.getElementById('vehCustomColor').value;
+  els.vehRichEditor.focus();
+  document.execCommand('foreColor', false, color);
+  render();
+});
+
+document.getElementById('rtHeadingBtn').addEventListener('mousedown', e => e.preventDefault());
+document.getElementById('rtHeadingBtn').addEventListener('click', () => {
+  els.vehRichEditor.focus();
+  document.execCommand('fontSize', false, '4');
+  document.execCommand('bold', false, null);
+  render();
+});
+
+document.getElementById('rtClearBtn').addEventListener('mousedown', e => e.preventDefault());
+document.getElementById('rtClearBtn').addEventListener('click', () => {
+  els.vehRichEditor.focus();
+  document.execCommand('removeFormat', false, null);
+  render();
+});
+
+els.vehRichEditor.addEventListener('input', render);
+els.vehHeadline.addEventListener('input', render);
+
+els.imgWidthSlider.addEventListener('input', () => {
+  els.imgWidthLabel.textContent = els.imgWidthSlider.value + 'px';
+  render();
+});
+
+/* ============================================================================
+   ADD IMAGE MODAL LOGIC
+   ============================================================================ */
 const imageModal = document.getElementById('imageModal');
 const modalInput = document.getElementById('modalImageUrlInput');
 const modalPreviewBox = document.getElementById('modalPreviewBox');
@@ -710,7 +1015,7 @@ function updateModalLivePreview(){
   const firstUrl = extracted[0];
   const extraCount = extracted.length > 1 ? `<div class="modal-preview-status">+ ${extracted.length - 1} more image(s) detected</div>` : '';
   modalPreviewBox.innerHTML = `
-    <img src="${esc(firstUrl)}" alt="Preview" onerror="this.outerHTML='<span class=\\'modal-preview-status\\' style=\\'color:#ff8080\\'>Could not load preview, but link can still be added.</span>'">
+    <img src="${esc(firstUrl)}" alt="Preview" onerror="this.outerHTML='<span class=\\'modal-preview-status\\' style=\\'color:#ff8080\\'>Preview unavailable, but link will still be added.</span>'">
     ${extraCount}
   `;
 }
@@ -725,7 +1030,6 @@ imageModal.addEventListener('click', e => {
 
 modalInput.addEventListener('input', updateModalLivePreview);
 
-// Immediately add & display image when user pastes link if autoAddOnPaste is enabled
 modalInput.addEventListener('paste', () => {
   setTimeout(() => {
     updateModalLivePreview();
@@ -750,7 +1054,6 @@ document.getElementById('confirmAddImageBtn').addEventListener('click', () => {
   }
 });
 
-// Handle Up / Down / Delete in the left-side photo list
 document.getElementById('photoList').addEventListener('click', e => {
   const btn = e.target.closest('button[data-action]');
   if(!btn) return;
@@ -773,8 +1076,7 @@ document.getElementById('photoList').addEventListener('click', e => {
 });
 
 document.getElementById('toggleRawUrlsBtn').addEventListener('click', () => {
-  const rawField = document.getElementById('rawUrlsField');
-  rawField.classList.toggle('hidden');
+  document.getElementById('rawUrlsField').classList.toggle('hidden');
 });
 
 document.getElementById('clearAllImagesBtn').addEventListener('click', () => {
@@ -782,7 +1084,6 @@ document.getElementById('clearAllImagesBtn').addEventListener('click', () => {
 });
 
 els.images.addEventListener('input', () => {
-  // If user pastes full <img src="..."> tags into the raw box, clean them automatically
   if(els.images.value.includes('<img') || els.images.value.includes('<IMG')){
     const extracted = extractUrlsFromInput(els.images.value);
     if(extracted.length){
@@ -793,7 +1094,30 @@ els.images.addEventListener('input', () => {
   render();
 });
 
-/* --- Existing Controls --- */
+/* ============================================================================
+   TEMPLATE SWITCHING & EXISTING CONTROLS
+   ============================================================================ */
+document.getElementById('templateSwitch').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentTemplate = btn.dataset.tpl;
+  document.querySelectorAll('#templateSwitch button').forEach(b => b.classList.toggle('active', b === btn));
+
+  const vehPanel = document.getElementById('vehicleControlPanel');
+  const partsPanel = document.getElementById('partsControlPanel');
+
+  if(currentTemplate === 'VEHICLE'){
+    vehPanel.classList.remove('hidden');
+    partsPanel.classList.add('hidden');
+  } else {
+    vehPanel.classList.add('hidden');
+    partsPanel.classList.remove('hidden');
+    els.notices.value = defaultNotices[currentTemplate] || defaultNotices.PARTS;
+    els.bulletMode.checked = (currentTemplate === 'PARTS');
+  }
+  render();
+});
+
 document.getElementById('gradePicker').addEventListener('click', e => {
   const btn = e.target.closest('button');
   if(!btn) return;
@@ -802,19 +1126,12 @@ document.getElementById('gradePicker').addEventListener('click', e => {
   render();
 });
 
-document.getElementById('templateSwitch').addEventListener('click', e => {
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  currentTemplate = btn.dataset.tpl;
-  document.querySelectorAll('#templateSwitch button').forEach(b => b.classList.toggle('active', b === btn));
-  els.notices.value = defaultNotices[currentTemplate];
-  els.bulletMode.checked = (currentTemplate === 'PARTS');
-  render();
-});
+[
+  els.titleMain, els.titleSub, els.comment, els.itemName,
+  els.itemModel, els.remarks, els.notices, els.phone,
+  els.accentColor, els.headerColor
+].forEach(el => el.addEventListener('input', render));
 
-Object.values(els).forEach(el => {
-  if(el !== els.images) el.addEventListener('input', render);
-});
 els.bulletMode.addEventListener('change', render);
 
 els.accentColor.addEventListener('input', () => {
