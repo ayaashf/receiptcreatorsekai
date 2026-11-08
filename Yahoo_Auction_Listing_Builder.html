@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yahoo Auction Listing Builder</title>
+<style>
+  :root{
+    --ink:#141414;
+    --panel:#1c1c1c;
+    --line:#2c2c2c;
+    --paper:#f4f2ee;
+    --accent:#ff6a00;
+    --muted:#8a8a8a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--ink);
+    color:#eee;
+  }
+  header{
+    padding:20px 28px 16px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  header .bar{width:26px;height:3px;background:var(--accent);flex-shrink:0;}
+  header h1{font-size:16px;margin:0;letter-spacing:.02em;font-weight:700;}
+  header p{margin:2px 0 0;color:var(--muted);font-size:12px;}
+
+  .template-switch{
+    display:flex;gap:6px;margin-left:auto;
+  }
+  .template-switch button{
+    background:#111;border:1px solid var(--line);color:#aaa;
+    padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:.03em;
+    border-radius:4px;cursor:pointer;text-transform:uppercase;
+  }
+  .template-switch button.active{background:var(--accent);color:#111;border-color:var(--accent);}
+
+  .layout{display:grid;grid-template-columns:410px 1fr;min-height:calc(100vh - 76px);}
+  @media (max-width:960px){.layout{grid-template-columns:1fr;}}
+
+  .form{padding:22px;border-right:1px solid var(--line);background:var(--panel);overflow-y:auto;}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-size:11px;color:var(--accent);text-transform:uppercase;
+    letter-spacing:.06em;margin-bottom:6px;font-weight:700;
+  }
+  .field input[type=text], .field textarea, .field select{
+    width:100%;background:#111;border:1px solid var(--line);color:#eee;
+    padding:9px 10px;font-size:13.5px;border-radius:3px;font-family:inherit;resize:vertical;
+  }
+  .field input[type=text]:focus, .field textarea:focus{outline:none;border-color:var(--accent);}
+  .field small{color:var(--muted);font-size:11px;display:block;margin-top:4px;line-height:1.5;}
+
+  .color-row{display:flex;gap:12px;}
+  .color-field{flex:1;}
+  .color-field label{display:block;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:700;}
+  .swatch-input{
+    display:flex;align-items:center;gap:8px;background:#111;border:1px solid var(--line);
+    border-radius:3px;padding:6px 8px;
+  }
+  .swatch-input input[type=color]{
+    width:32px;height:32px;border:none;padding:0;background:none;cursor:pointer;border-radius:3px;overflow:hidden;
+  }
+  .swatch-input span{font-size:12px;color:#ccc;font-family:monospace;}
+
+  .grade-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+  .grade-picker button{
+    padding:9px 0;background:#111;border:1px solid var(--line);color:#ccc;
+    font-weight:700;border-radius:3px;cursor:pointer;font-size:13px;
+  }
+  .grade-picker button.active{background:var(--accent);border-color:var(--accent);color:#111;}
+
+  .divider{height:1px;background:var(--line);margin:20px 0;}
+  .section-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px;font-weight:700;}
+
+  .toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .toggle-row input{width:auto;}
+  .toggle-row label{margin:0;font-size:12px;color:#ccc;text-transform:none;letter-spacing:0;font-weight:400;}
+
+  /* --- Image Manager Styles --- */
+  .photo-section-header{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+  }
+  .photo-section-header .section-label{margin:0;}
+  .btn-add-image{
+    background:var(--accent);color:#111;border:none;padding:8px 14px;
+    font-size:12px;font-weight:800;border-radius:4px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;letter-spacing:.03em;
+    text-transform:uppercase;transition:transform .1s, opacity .15s;
+  }
+  .btn-add-image:hover{opacity:0.92;}
+  .btn-add-image:active{transform:scale(0.97);}
+
+  .photo-actions-sub{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+  }
+  .link-btn{
+    background:none;border:none;color:var(--muted);font-size:11px;
+    cursor:pointer;padding:0;text-decoration:underline;
+  }
+  .link-btn:hover{color:#ddd;}
+
+  .photo-list{
+    display:flex;flex-direction:column;gap:8px;margin-bottom:10px;
+  }
+  .photo-empty{
+    background:#141414;border:1px dashed var(--line);border-radius:4px;
+    padding:16px 12px;text-align:center;color:var(--muted);font-size:12px;
+  }
+  .photo-item{
+    display:flex;align-items:center;gap:10px;background:#111;
+    border:1px solid var(--line);border-radius:4px;padding:7px 9px;
+  }
+  .photo-thumb{
+    width:46px;height:46px;border-radius:3px;object-fit:cover;
+    background:#222;border:1px solid #333;flex-shrink:0;
+  }
+  .photo-meta{flex:1;min-width:0;}
+  .photo-badge{
+    display:inline-block;font-size:10px;font-weight:700;color:var(--accent);
+    text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;
+  }
+  .photo-url{
+    font-size:11px;color:#bbb;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;font-family:monospace;
+  }
+  .photo-controls{display:flex;gap:4px;flex-shrink:0;}
+  .icon-btn{
+    background:#1c1c1c;border:1px solid var(--line);color:#aaa;
+    width:26px;height:26px;border-radius:3px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+  }
+  .icon-btn:hover{border-color:var(--accent);color:#fff;}
+  .icon-btn.danger:hover{border-color:#ff4d4d;color:#ff4d4d;}
+
+  /* --- Modal Prompt for Adding Image --- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,0.75);
+    display:flex;align-items:center;justify-content:center;z-index:999;
+    padding:16px;backdrop-filter:blur(2px);
+  }
+  .modal-card{
+    background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);
+    width:100%;max-width:480px;border-radius:6px;padding:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6);
+  }
+  .modal-title{
+    font-size:14px;font-weight:700;color:#fff;margin:0 0 6px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .modal-desc{
+    font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.5;
+  }
+  .modal-input{
+    width:100%;background:#111;border:1px solid var(--line);color:#eee;
+    padding:11px 12px;font-size:13px;border-radius:4px;font-family:monospace;
+    margin-bottom:10px;
+  }
+  .modal-input:focus{outline:none;border-color:var(--accent);}
+  .modal-preview-box{
+    background:#111;border:1px solid var(--line);border-radius:4px;
+    padding:10px;margin-bottom:14px;text-align:center;min-height:90px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  }
+  .modal-preview-box img{
+    max-width:100%;max-height:160px;border-radius:3px;border:1px solid #333;
+  }
+  .modal-preview-status{font-size:11px;color:var(--muted);}
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:8px;
+  }
+  .btn-secondary{
+    background:#111;border:1px solid var(--line);color:#ccc;
+    padding:8px 14px;font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--accent);border:1px solid var(--accent);color:#111;
+    padding:8px 18px;font-size:12px;font-weight:700;border-radius:4px;cursor:pointer;
+  }
+
+  .preview-pane{display:flex;flex-direction:column;}
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel);
+  }
+  .toolbar .tabs{display:flex;gap:2px;}
+  .toolbar .tabs button{
+    background:transparent;border:1px solid var(--line);color:#aaa;
+    padding:7px 16px;font-size:12.5px;cursor:pointer;border-radius:3px;
+  }
+  .toolbar .tabs button.active{background:#111;color:var(--accent);border-color:var(--accent);}
+  .copy-btn{
+    background:var(--accent);color:#111;border:none;padding:9px 18px;
+    font-size:12.5px;font-weight:700;border-radius:3px;cursor:pointer;letter-spacing:.02em;
+  }
+  .copy-btn:active{transform:scale(.97);}
+  .pane-body{flex:1;overflow:auto;background:var(--paper);}
+  #previewFrame{width:100%;height:100%;border:none;background:var(--paper);}
+  #htmlOutput{
+    width:100%;height:100%;border:none;background:#0d0d0d;color:#c7ffb3;
+    font-family:"SF Mono",Consolas,monospace;font-size:12px;line-height:1.6;
+    padding:20px;resize:none;box-sizing:border-box;
+  }
+  .hidden{display:none !important;}
+  .hint{
+    background:#241505;border:1px solid #7a3a10;color:#ffb87a;
+    padding:10px 12px;border-radius:4px;font-size:12px;line-height:1.6;margin-bottom:18px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar"></div>
+  <div>
+    <h1>Yahoo Auction Listing Builder</h1>
+    <p>Edit on the left → check Preview → copy the HTML tab into your Yahoo Auction description box</p>
+  </div>
+  <div class="template-switch" id="templateSwitch">
+    <button data-tpl="PARTS" class="active">Parts</button>
+    <button data-tpl="VEHICLE">Vehicle</button>
+    <button data-tpl="BIKE">Bike</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <div class="form">
+    <div class="hint">Tap a grade letter (S–J) and that row auto-highlights below. Use <b>+ Add Image</b> to paste any direct image URL (or ImageUp HTML block) and it will render immediately in the description.</div>
+
+    <p class="section-label">Color Theme</p>
+    <div class="color-row">
+      <div class="color-field">
+        <label>Accent Color</label>
+        <div class="swatch-input">
+          <input type="color" id="accentColor" value="#ff6a00">
+          <span id="accentColorLabel">#FF6A00</span>
+        </div>
+      </div>
+      <div class="color-field">
+        <label>Header Color</label>
+        <div class="swatch-input">
+          <input type="color" id="headerColor" value="#1a1a1a">
+          <span id="headerColorLabel">#1A1A1A</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Title</p>
+    <div class="field">
+      <label>Main Title</label>
+      <input type="text" id="titleMain" value="ローバーミニ WORK CR">
+    </div>
+    <div class="field">
+      <label>Subtitle / Details</label>
+      <input type="text" id="titleSub" value="グラナイトグリーン　10インチ　4.5J　ホイール＆タイヤセット／ワーク ミニ クーパー">
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Comment</p>
+    <div class="field">
+      <textarea id="comment" rows="3">売切り！ ローバーミニ WORK CR グラナイトグリーン 10インチ 4.5J ホイル タイヤセットワーク ミニ クーパー</textarea>
+    </div>
+
+    <div class="divider"></div>
+    <div class="photo-section-header">
+      <p class="section-label">Photos in Description</p>
+      <button type="button" class="btn-add-image" id="openAddImageBtn">+ Add Image</button>
+    </div>
+
+    <div class="photo-actions-sub">
+      <span style="font-size:11px;color:var(--muted);" id="photoCountLabel">0 photos added</span>
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="link-btn" id="toggleRawUrlsBtn">Edit Raw URLs</button>
+        <button type="button" class="link-btn" id="clearAllImagesBtn" style="color:#d96868;">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Visual Thumbnail List -->
+    <div id="photoList" class="photo-list"></div>
+
+    <!-- Optional Raw Textarea (synced automatically) -->
+    <div class="field hidden" id="rawUrlsField">
+      <label>Image URLs (one per line)</label>
+      <textarea id="images" rows="4" placeholder="https://yourwebsite.com/photo1.jpg&#10;https://yourwebsite.com/photo2.jpg"></textarea>
+      <small>You can also bulk-edit URLs here. Each line renders as a framed image inside the description.</small>
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Item Info</p>
+    <div class="field">
+      <label>Product Name</label>
+      <input type="text" id="itemName" value="ミニ">
+    </div>
+    <div class="field">
+      <label>Model</label>
+      <input type="text" id="itemModel" value="WORK CR">
+    </div>
+    <div class="field">
+      <label>Grade</label>
+      <div class="grade-picker" id="gradePicker">
+        <button data-grade="S">S</button>
+        <button data-grade="A">A</button>
+        <button data-grade="B" class="active">B</button>
+        <button data-grade="C">C</button>
+        <button data-grade="D">D</button>
+        <button data-grade="J">J</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Remarks</label>
+      <input type="text" id="remarks" value="※中古品">
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Footer / Terms</p>
+    <div class="toggle-row">
+      <input type="checkbox" id="bulletMode" checked>
+      <label for="bulletMode">Show as bulleted list (untick for plain paragraphs — used for the Vehicle/Bike footer style)</label>
+    </div>
+    <div class="field">
+      <textarea id="notices" rows="12"></textarea>
+      <small>One line = one item. Wrap a word in [[double brackets]] to auto-bold it in your accent color, e.g. [[within 48 hours]].</small>
+    </div>
+    <div class="field">
+      <label>Contact Phone (optional)</label>
+      <input type="text" id="phone" value="">
+    </div>
+  </div>
+
+  <div class="preview-pane">
+    <div class="toolbar">
+      <div class="tabs">
+        <button id="tabPreview" class="active">Preview</button>
+        <button id="tabCode">HTML</button>
+      </div>
+      <button class="copy-btn" id="copyBtn">Copy HTML</button>
+    </div>
+    <div class="pane-body">
+      <iframe id="previewFrame"></iframe>
+      <textarea id="htmlOutput" class="hidden" readonly></textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- Prompt Modal for Adding Direct Image Link -->
+<div class="modal-backdrop hidden" id="imageModal">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span>Add Image to Description</span>
+      <button type="button" class="icon-btn" id="closeModalX" title="Close">✕</button>
+    </div>
+    <p class="modal-desc">
+      Paste the direct image link (e.g. <code>https://.../photo.jpg</code>) or paste an entire HTML snippet from <b>ImageUp (いめーじあっぷ)</b>. It will automatically show in your description upon pasting!
+    </p>
+    <input
+      type="text"
+      id="modalImageUrlInput"
+      class="modal-input"
+      placeholder="Paste image URL or <img src=&quot;...&quot;> here..."
+      autocomplete="off"
+    >
+    <div class="toggle-row" style="margin-bottom:12px;">
+      <input type="checkbox" id="autoAddOnPaste" checked>
+      <label for="autoAddOnPaste">Immediately add & show in description as soon as I paste</label>
+    </div>
+    <div class="modal-preview-box" id="modalPreviewBox">
+      <span class="modal-preview-status" id="modalPreviewStatus">Waiting for image link...</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
+      <button type="button" class="btn-primary" id="confirmAddImageBtn">Add Image</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const grades = ["S","A","B","C","D","J"];
+const gradeText = {
+  S: "キズ・汚れなどもほとんど無く、動作・機能に問題の無い中古品",
+  A: "小さなキズ・汚れなどがありますが、動作・機能には問題の無い中古品",
+  B: "中古とわかる程度のキズ・汚れなどがありますが、動作・機能には問題の無い中古品",
+  C: "一目でわかる大きなキズ・汚れなどがありますが、動作・機能には問題の無い中古品",
+  D: "破損個所や一部動作に支障のある場合がありますが、使用可能な中古品",
+  J: "ジャンク商品"
+};
+let currentGrade = "B";
+let currentTemplate = "PARTS";
+
+const defaultNotices = {
+PARTS: `こちらの商品の送料負担は【[[落札者様]]】となります。入札前に必ず送料をご確認下さい。
+この商品の送料は着払いになります。
+写真が全てです。写真をご確認の上、入札をお願い致します。
+商品の色は画像と実物と異なる場合がございますのでご了承下さい。
+営業時間外（平日8:00～17:00以外）及び日曜、祝日は閉店の為、入札の取り消しは出来ません。
+落札後は必ず[[48時間以内]]に購入手続きをお願い致します。
+発送までの日数は入金確認後1～3営業日以内となります。
+中古品の為、使用感がございます。ご了承の上ご入札下さい。
+落札後の返品・交換はいかなる場合も応じません。
+新規アカウントの方、マイナス評価の多い方の入札は取り消しさせて頂く場合がございます。
+ヤフオクの仕様上、モバイル版では規約の説明欄が適切に表示されない場合がございますので、
+入札と同時に注意事項説明に同意いただいたものとさせていただきます。ご理解のほどよろしくお願いいたします。`,
+VEHICLE: `現車優先・現状販売となりますので、できる限り現車確認をお願いいたします。
+
+落札後はいかなる理由がありましても現状渡し・ノークレーム・ノーリターンでお願いいたします。
+
+また、落札後[[48時間以内]]にお支払い可能な方のみご入札ください。
+
+期限内にご入金が確認できない場合は、落札者都合によるキャンセルとさせていただき、悪い評価を付けさせていただく場合がございますのでご了承ください。
+
+ご不明な点がございましたら、お気軽にお問い合わせください。
+
+よろしくお願いいたします。`,
+BIKE: `現車優先・現状販売となりますので、できる限り現車確認をお願いいたします。
+
+落札後はいかなる理由がありましても現状渡し・ノークレーム・ノーリターンでお願いいたします。
+
+また、落札後[[48時間以内]]にお支払い可能な方のみご入札ください。
+
+期限内にご入金が確認できない場合は、落札者都合によるキャンセルとさせていただき、悪い評価を付けさせていただく場合がございますのでご了承ください。
+
+ご不明な点がございましたら、お気軽にお問い合わせください。
+
+よろしくお願いいたします。`
+};
+
+const els = {
+  titleMain: document.getElementById('titleMain'),
+  titleSub: document.getElementById('titleSub'),
+  comment: document.getElementById('comment'),
+  images: document.getElementById('images'),
+  itemName: document.getElementById('itemName'),
+  itemModel: document.getElementById('itemModel'),
+  remarks: document.getElementById('remarks'),
+  notices: document.getElementById('notices'),
+  phone: document.getElementById('phone'),
+  bulletMode: document.getElementById('bulletMode'),
+  accentColor: document.getElementById('accentColor'),
+  headerColor: document.getElementById('headerColor'),
+};
+
+els.notices.value = defaultNotices.PARTS;
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  return {
+    r: parseInt(hex.substring(0,2),16),
+    g: parseInt(hex.substring(2,4),16),
+    b: parseInt(hex.substring(4,6),16)
+  };
+}
+function rgbToHex(r,g,b){
+  return '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+function lighten(hex, t){
+  const {r,g,b} = hexToRgb(hex);
+  return rgbToHex(r+(255-r)*t, g+(255-g)*t, b+(255-b)*t);
+}
+
+/* --- Helper: Extract URLs from either direct link(s) or <img src="..."> HTML tags --- */
+function extractUrlsFromInput(rawText){
+  if(!rawText) return [];
+  const urls = [];
+  // Check if user pasted HTML containing <img ... src="...">
+  const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+  let match;
+  while((match = imgRegex.exec(rawText)) !== null){
+    if(match[1] && match[1].trim()){
+      urls.push(match[1].trim());
+    }
+  }
+  if(urls.length > 0) return urls;
+
+  // Otherwise split by newlines or spaces if multiple URLs were pasted
+  return rawText
+    .split(/[\r\n]+/)
+    .map(u => u.trim())
+    .filter(u => u.length > 0 && !u.startsWith('<'));
+}
+
+function getCurrentImageList(){
+  return els.images.value
+    .split('\n')
+    .map(u => u.trim())
+    .filter(u => u.length > 0);
+}
+
+function setCurrentImageList(list){
+  els.images.value = list.join('\n');
+  renderPhotoListUI();
+  render();
+}
+
+function renderPhotoListUI(){
+  const urls = getCurrentImageList();
+  const listEl = document.getElementById('photoList');
+  const countLabel = document.getElementById('photoCountLabel');
+  countLabel.textContent = `${urls.length} photo${urls.length === 1 ? '' : 's'} added`;
+
+  if(urls.length === 0){
+    listEl.innerHTML = `<div class="photo-empty">No photos in description yet. Click <b>+ Add Image</b> above to paste a direct image URL.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = urls.map((url, idx) => `
+    <div class="photo-item">
+      <img class="photo-thumb" src="${esc(url)}" alt="Photo ${idx + 1}" onerror="this.src='https://placehold.co/80x80/222222/ff6a00?text=IMG'">
+      <div class="photo-meta">
+        <span class="photo-badge">Photo #${idx + 1}</span>
+        <div class="photo-url" title="${esc(url)}">${esc(url)}</div>
+      </div>
+      <div class="photo-controls">
+        <button type="button" class="icon-btn" data-action="up" data-idx="${idx}" title="Move Up" ${idx === 0 ? 'disabled style="opacity:.35;pointer-events:none;"' : ''}>↑</button>
+        <button type="button" class="icon-btn" data-action="down" data-idx="${idx}" title="Move Down" ${idx === urls.length - 1 ? 'disabled style="opacity:.35;pointer-events:none;"' : ''}>↓</button>
+        <button type="button" class="icon-btn danger" data-action="delete" data-idx="${idx}" title="Remove Photo">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function noticeLine(line){
+  line = esc(line);
+  const accent = els.accentColor.value.toUpperCase();
+  line = line.replace(/\[\[(.+?)\]\]/g, `<FONT COLOR="${accent}"><B>$1</B></FONT>`);
+  return line;
+}
+
+function buildGradeRows(){
+  const accent = els.accentColor.value.toUpperCase();
+  const tint = lighten(accent, 0.82);
+  return grades.map((g,i) => {
+    const active = g === currentGrade;
+    const rowBg = active ? tint : (i%2===0 ? '#F7F7F7' : '#FFFFFF');
+    const letterSize = active ? '3' : '2';
+    const bStart = active ? '<B>' : '';
+    const bEnd = active ? '</B>' : '';
+    return `<TR><TD WIDTH="8%" BGCOLOR="${rowBg}" ALIGN="CENTER"><FONT FACE="Arial" COLOR="${accent}" SIZE="${letterSize}"><B>${g}</B></FONT></TD>
+<TD WIDTH="92%" BGCOLOR="${rowBg}"><FONT FACE="Arial" COLOR="#333333" SIZE="2">${bStart}${gradeText[g]}${bEnd}</FONT></TD></TR>`;
+  }).join('\n\n');
+}
+
+function buildNotices(){
+  const raw = els.notices.value.split('\n').map(l => l.trim());
+  if(els.bulletMode.checked){
+    return raw.filter(l => l.length).map(l => '・' + noticeLine(l)).join('<BR>\n');
+  } else {
+    const out = [];
+    let para = [];
+    raw.forEach(l => {
+      if(l.length === 0){
+        if(para.length){ out.push(para.join('<BR>\n')); para = []; }
+      } else {
+        para.push(noticeLine(l));
+      }
+    });
+    if(para.length) out.push(para.join('<BR>\n'));
+    return out.join('<BR><BR>\n\n');
+  }
+}
+
+/* --- Matches the exact Table + Header + Accent Border style of the description --- */
+function buildImages(){
+  const accent = els.accentColor.value.toUpperCase();
+  const headerColor = els.headerColor.value.toUpperCase();
+  const urls = getCurrentImageList();
+  if(!urls.length) return '';
+
+  const imgs = urls.map((u, idx) => {
+    const spacer = idx < urls.length - 1
+      ? `\n<TR><TD HEIGHT="8" BGCOLOR="#F2F2F2"></TD></TR>`
+      : '';
+    return `<TR><TD BGCOLOR="#FFFFFF" ALIGN="CENTER"><IMG SRC="${esc(u)}" WIDTH="100%" BORDER="0" ALT="商品画像 ${idx + 1}"></TD></TR>${spacer}`;
+  }).join('\n');
+
+  return `<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="8" BGCOLOR="#2B2B2B">
+<TR><TH BGCOLOR="${headerColor}" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#FFFFFF" SIZE="2"><B>商品画像</B></FONT></TH></TR>
+${imgs}
+</TABLE>
+
+<BR>
+
+`;
+}
+
+function buildHTML(){
+  const accent = els.accentColor.value.toUpperCase();
+  const headerColor = els.headerColor.value.toUpperCase();
+  const titleMain = esc(els.titleMain.value);
+  const titleSub = esc(els.titleSub.value);
+  const comment = esc(els.comment.value);
+  const itemName = esc(els.itemName.value);
+  const itemModel = esc(els.itemModel.value);
+  const remarks = esc(els.remarks.value);
+  const gradeRows = buildGradeRows();
+  const notices = buildNotices();
+  const imagesBlock = buildImages();
+  const phone = els.phone.value.trim();
+  const phoneBlock = phone ? `<BR><BR><FONT FACE="Arial" COLOR="${accent}" SIZE="3"><B>携帯電話：${esc(phone)}</B></FONT>` : '';
+
+  return `<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+<TR><TD BGCOLOR="${headerColor}" ALIGN="CENTER">
+<FONT FACE="Arial" SIZE="4" COLOR="#FFFFFF"><B>${titleMain}</B></FONT><BR>
+<FONT FACE="Arial" SIZE="3" COLOR="#FFFFFF">${titleSub}</FONT>
+</TD></TR>
+</TABLE>
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0"><TR><TD BGCOLOR="${accent}" HEIGHT="4"></TD></TR></TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLPADDING="8" CELLSPACING="0" BGCOLOR="#2B2B2B">
+<TR><TD BGCOLOR="#F7F7F7">
+<FONT FACE="Arial" COLOR="#333333" SIZE="2"><B>コメント</B></FONT><BR>
+<FONT FACE="Arial" COLOR="#333333" SIZE="2">
+${comment}
+</FONT>
+</TD></TR>
+</TABLE>
+
+<BR>
+
+${imagesBlock}<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#2B2B2B">
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#333333" SIZE="2">商品名</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="Arial" COLOR="#333333" SIZE="2">${itemName}</FONT></TD></TR>
+
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#333333" SIZE="2">型番</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="Arial" COLOR="#333333" SIZE="2">${itemModel}</FONT></TD></TR>
+
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#333333" SIZE="2">ランク</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="Arial" COLOR="${accent}" SIZE="4"><B>${currentGrade}</B></FONT>　<FONT FACE="Arial" COLOR="#666666" SIZE="2">※下記ランク表参照</FONT></TD></TR>
+
+<TR><TH WIDTH="20%" BGCOLOR="#F2F2F2" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#333333" SIZE="2">備考</FONT></TH>
+<TD WIDTH="80%" BGCOLOR="#FFFFFF"><FONT FACE="Arial" COLOR="#333333" SIZE="2">${remarks}</FONT></TD></TR>
+</TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#2B2B2B">
+<TR><TH COLSPAN="2" BGCOLOR="${headerColor}" ALIGN="LEFT"><FONT FACE="Arial" COLOR="#FFFFFF" SIZE="2"><B>商品ランクについて</B></FONT></TH></TR>
+
+${gradeRows}
+</TABLE>
+
+<BR>
+
+<TABLE WIDTH="100%" BORDER="1" BORDERCOLOR="${accent}" CELLSPACING="0" CELLPADDING="8" BGCOLOR="#2B2B2B">
+<TR><TH BGCOLOR="${headerColor}" ALIGN="CENTER"><FONT FACE="Arial" SIZE="2" COLOR="#FFFFFF"><B>下記オークション注意事項をご一読いただき、同意いただける方のみご入札ください</B></FONT></TH></TR>
+<TR><TD BGCOLOR="#FFFFFF">
+<FONT FACE="Arial" COLOR="#333333" SIZE="2">
+${notices}${phoneBlock}
+</FONT>
+</TD></TR>
+</TABLE>`;
+}
+
+function render(){
+  const html = buildHTML();
+  document.getElementById('htmlOutput').value = html;
+  const frame = document.getElementById('previewFrame');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(`<div style="padding:20px;font-family:Arial,sans-serif;">${html}</div>`);
+  doc.close();
+}
+
+/* --- Add Image Modal Logic --- */
+const imageModal = document.getElementById('imageModal');
+const modalInput = document.getElementById('modalImageUrlInput');
+const modalPreviewBox = document.getElementById('modalPreviewBox');
+const autoAddCheckbox = document.getElementById('autoAddOnPaste');
+
+function openImageModal(){
+  modalInput.value = '';
+  modalPreviewBox.innerHTML = `<span class="modal-preview-status">Waiting for image link...</span>`;
+  imageModal.classList.remove('hidden');
+  setTimeout(() => modalInput.focus(), 40);
+}
+
+function closeImageModal(){
+  imageModal.classList.add('hidden');
+}
+
+function commitModalImages(){
+  const extracted = extractUrlsFromInput(modalInput.value);
+  if(!extracted.length) return false;
+  const current = getCurrentImageList();
+  setCurrentImageList([...current, ...extracted]);
+  closeImageModal();
+  return true;
+}
+
+function updateModalLivePreview(){
+  const extracted = extractUrlsFromInput(modalInput.value);
+  if(!extracted.length){
+    modalPreviewBox.innerHTML = `<span class="modal-preview-status">Waiting for image link...</span>`;
+    return;
+  }
+  const firstUrl = extracted[0];
+  const extraCount = extracted.length > 1 ? `<div class="modal-preview-status">+ ${extracted.length - 1} more image(s) detected</div>` : '';
+  modalPreviewBox.innerHTML = `
+    <img src="${esc(firstUrl)}" alt="Preview" onerror="this.outerHTML='<span class=\\'modal-preview-status\\' style=\\'color:#ff8080\\'>Could not load preview, but link can still be added.</span>'">
+    ${extraCount}
+  `;
+}
+
+document.getElementById('openAddImageBtn').addEventListener('click', openImageModal);
+document.getElementById('closeModalX').addEventListener('click', closeImageModal);
+document.getElementById('cancelModalBtn').addEventListener('click', closeImageModal);
+
+imageModal.addEventListener('click', e => {
+  if(e.target === imageModal) closeImageModal();
+});
+
+modalInput.addEventListener('input', updateModalLivePreview);
+
+// Immediately add & display image when user pastes link if autoAddOnPaste is enabled
+modalInput.addEventListener('paste', () => {
+  setTimeout(() => {
+    updateModalLivePreview();
+    if(autoAddCheckbox.checked){
+      commitModalImages();
+    }
+  }, 60);
+});
+
+modalInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    commitModalImages();
+  } else if(e.key === 'Escape'){
+    closeImageModal();
+  }
+});
+
+document.getElementById('confirmAddImageBtn').addEventListener('click', () => {
+  if(!commitModalImages()){
+    modalInput.focus();
+  }
+});
+
+// Handle Up / Down / Delete in the left-side photo list
+document.getElementById('photoList').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action]');
+  if(!btn) return;
+  const action = btn.dataset.action;
+  const idx = parseInt(btn.dataset.idx, 10);
+  const list = getCurrentImageList();
+
+  if(action === 'delete'){
+    list.splice(idx, 1);
+  } else if(action === 'up' && idx > 0){
+    const tmp = list[idx - 1];
+    list[idx - 1] = list[idx];
+    list[idx] = tmp;
+  } else if(action === 'down' && idx < list.length - 1){
+    const tmp = list[idx + 1];
+    list[idx + 1] = list[idx];
+    list[idx] = tmp;
+  }
+  setCurrentImageList(list);
+});
+
+document.getElementById('toggleRawUrlsBtn').addEventListener('click', () => {
+  const rawField = document.getElementById('rawUrlsField');
+  rawField.classList.toggle('hidden');
+});
+
+document.getElementById('clearAllImagesBtn').addEventListener('click', () => {
+  setCurrentImageList([]);
+});
+
+els.images.addEventListener('input', () => {
+  // If user pastes full <img src="..."> tags into the raw box, clean them automatically
+  if(els.images.value.includes('<img') || els.images.value.includes('<IMG')){
+    const extracted = extractUrlsFromInput(els.images.value);
+    if(extracted.length){
+      els.images.value = extracted.join('\n');
+    }
+  }
+  renderPhotoListUI();
+  render();
+});
+
+/* --- Existing Controls --- */
+document.getElementById('gradePicker').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentGrade = btn.dataset.grade;
+  document.querySelectorAll('#gradePicker button').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
+document.getElementById('templateSwitch').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentTemplate = btn.dataset.tpl;
+  document.querySelectorAll('#templateSwitch button').forEach(b => b.classList.toggle('active', b === btn));
+  els.notices.value = defaultNotices[currentTemplate];
+  els.bulletMode.checked = (currentTemplate === 'PARTS');
+  render();
+});
+
+Object.values(els).forEach(el => {
+  if(el !== els.images) el.addEventListener('input', render);
+});
+els.bulletMode.addEventListener('change', render);
+
+els.accentColor.addEventListener('input', () => {
+  document.getElementById('accentColorLabel').textContent = els.accentColor.value.toUpperCase();
+});
+els.headerColor.addEventListener('input', () => {
+  document.getElementById('headerColorLabel').textContent = els.headerColor.value.toUpperCase();
+});
+
+document.getElementById('tabPreview').addEventListener('click', () => {
+  document.getElementById('tabPreview').classList.add('active');
+  document.getElementById('tabCode').classList.remove('active');
+  document.getElementById('previewFrame').classList.remove('hidden');
+  document.getElementById('htmlOutput').classList.add('hidden');
+});
+document.getElementById('tabCode').addEventListener('click', () => {
+  document.getElementById('tabCode').classList.add('active');
+  document.getElementById('tabPreview').classList.remove('active');
+  document.getElementById('htmlOutput').classList.remove('hidden');
+  document.getElementById('previewFrame').classList.add('hidden');
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const out = document.getElementById('htmlOutput');
+  out.classList.remove('hidden');
+  document.getElementById('previewFrame').classList.add('hidden');
+  out.select();
+  document.execCommand('copy');
+  const btn = document.getElementById('copyBtn');
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = original; }, 1500);
+  if(!document.getElementById('tabCode').classList.contains('active')){
+    document.getElementById('tabPreview').classList.add('active');
+    out.classList.add('hidden');
+    document.getElementById('previewFrame').classList.remove('hidden');
+  }
+});
+
+renderPhotoListUI();
+render();
+</script>
+
+</body>
+</html>
